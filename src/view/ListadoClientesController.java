@@ -11,6 +11,13 @@ import javafx.fxml.Initializable;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import util.Cliente;
 
 /**
  * FXML Controller class
@@ -18,12 +25,19 @@ import java.util.logging.Logger;
  * @author ALCAOLIVA
  */
 public class ListadoClientesController implements Initializable {
+    
+    @FXML private TableView tablaDatos;
+    @FXML private TableColumn columnaNombre;
+    private TableColumn columnaApellidos;
+    
+    private ObservableList<Cliente> data;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        data = FXCollections.observableArrayList();
         fillClientes();
     }  
     
@@ -31,26 +45,45 @@ public class ListadoClientesController implements Initializable {
      * Llena el GridLayout con la tabla Clientes de la base de datos
      */
     private void fillClientes(){
-        String query = null;
-        Connection connection = null;        
-        try {
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:/cuaderno_db.db", "", "");
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while(rs.next()){
-                System.out.println(rs.getString("Nombre"));
-            }
-        } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        Connection conn = connect();
+        ResultSet result = null;
+        int row = 0;
+        if (conn!=null){
             try {
-                if (connection != null) {
-                    connection.close();
+                PreparedStatement st = conn.prepareStatement("SELECT * FROM Clientes");
+                result = st.executeQuery();
+                while (result.next()) {
+                    data.add(new Cliente(result.getString("Nombre")));
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } 
+            configureTable();
+        }
+    }
+    
+    private Connection connect() {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection("jdbc:sqlite:/cuadernoDB.db");
+        } catch (SQLException ex) {
+            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return conn;
+    }
+    
+    private void close(Connection conn){
+        try {
+            conn.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void configureTable() {
+        tablaDatos.setEditable(true);
+        columnaNombre.setCellValueFactory(
+            new PropertyValueFactory<Cliente, String>("nombre"));
+        tablaDatos.setItems(data);
     }
 }
