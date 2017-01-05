@@ -41,6 +41,7 @@ public class Cliente {
         return asesor;
     }
     
+    
     public String getNombre(){
         return nombre.get();
     }

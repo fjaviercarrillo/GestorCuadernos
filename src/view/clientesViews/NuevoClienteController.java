@@ -14,6 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import util.Cliente;
+import util.ConexionBD;
 
 /**
  * FXML Controller class
@@ -33,6 +35,17 @@ public class NuevoClienteController implements Initializable {
     @FXML private CheckBox checkBoxAsesor;
     @FXML private Button closeButton;
     
+    private String nombre;
+    private String apellidos;
+    private String DNI;
+    private String direccion;
+    private int CP;
+    private String localidad;
+    private String provincia;
+    private String pais;
+    private boolean necesitaAsesor;
+    
+    private Cliente nuevoCliente;
     /**
      * Initializes the controller class.
      * @param url
@@ -47,29 +60,44 @@ public class NuevoClienteController implements Initializable {
      * Comprueba si los datos del cliente son correctos y lo ingresa en la BD
      */
     @FXML private void aceptar() {
-        if (textFieldNombre.getText().compareTo("") == 0) {
-            showAlert("El nombre no puede estar vacío");
-        } else if (textFieldApellidos.getText().compareTo("") == 0) {
-            showAlert("Los apellidos no pueden estar vacíos");
-        } else if (textFieldDNI.getText().compareTo("") == 0) {
-            showAlert("El DNI no puede estar vacío");
-        } else if (!isDNICorrect(textFieldDNI.getText())) {
-            showAlert("El formato del DNI no es correcto (debe ser del tipo 12345678A)");
-        } else if (textFieldDireccion.getText().compareTo("") == 0) {
-            showAlert("La dirección no puede estar vacía");
-        } else if (textFieldCP.getText().compareTo("") == 0) {
-            showAlert("El código postal no puede estar vacío");
-        } else if (!isCPCorrect(textFieldCP.getText())) {
-            showAlert("El código postal no es correcto (debe de ser númerico y no mayor de 5 dígitos");
-        } else if (textFieldLocalidad.getText().compareTo("") == 0) {
-            showAlert("La localidad no puede estar vacía");
-        } else if (textFieldProvincia.getText().compareTo("") == 0) {
-            showAlert("La provincia no puede estar vacía");
-        } else if (textFieldPais.getText().compareTo("") == 0) {
-            showAlert("El país no puede estar vacío");
+        if (isCPCorrect(textFieldCP.getText())) {
+            getFieldData();
+            if (nombre.compareTo("") == 0) {
+                showAlert("El nombre no puede estar vacío");
+            } else if (apellidos.compareTo("") == 0) {
+                showAlert("Los apellidos no pueden estar vacíos");
+            } else if (DNI.compareTo("") == 0) {
+                showAlert("El DNI no puede estar vacío");
+            } else if (!isDNICorrect(DNI)) {
+                showAlert("El formato del DNI no es correcto (debe ser del tipo 12345678A)");
+            } else if (direccion.compareTo("") == 0) {
+                showAlert("La dirección no puede estar vacía");
+            } else if (localidad.compareTo("") == 0) {
+                showAlert("La localidad no puede estar vacía");
+            } else if (provincia.compareTo("") == 0) {
+                showAlert("La provincia no puede estar vacía");
+            } else if (pais.compareTo("") == 0) {
+                showAlert("El país no puede estar vacío");
+            } else {
+                addUserToBD();
+            }
         } else {
-            addUserToBD();
+            showAlert("El código postal no es correcto (debe de ser numérico y no mayor de 5 dígitos");
         }
+        
+        
+    }
+    
+    private void getFieldData() {
+        nombre = textFieldNombre.getText();
+        apellidos = textFieldApellidos.getText();
+        DNI = textFieldDNI.getText();
+        direccion = textFieldDireccion.getText();
+        CP = Integer.parseInt(textFieldCP.getText());
+        localidad = textFieldLocalidad.getText();
+        provincia = textFieldProvincia.getText();
+        pais = textFieldPais.getText();
+        necesitaAsesor = checkBoxAsesor.isSelected();
     }
     
     /**
@@ -102,7 +130,17 @@ public class NuevoClienteController implements Initializable {
      * Añade el usuario a la base de datos
      */
     private void addUserToBD() {
-        
+        ConexionBD connection = new ConexionBD();
+        int intNecesitaAsesor = (necesitaAsesor) ? 1 : 0;
+        String updateQuery = "INSERT INTO Clientes (Nombre, Apellidos, DNI, Direccion, CP, Localidad, Provincia, Pais, NecesitaAsesor) "
+                + "VALUES ('" + nombre +"', '" + apellidos +"', '" + DNI +"', '" + direccion + "', " + CP + ", '" + localidad + "', "
+                + "'" + provincia + "', '" + pais + "', " + intNecesitaAsesor + ");";
+        if (connection.insertQuery(updateQuery)) {
+            showAlert("Usuario creado con éxito");
+        } else {
+            showAlert("Ha habido un error al crear el usuario");
+        }
+        connection.close();
     }
     
     /**

@@ -21,10 +21,13 @@ import view.ListadoClientesController;
 public class ConexionBD {
     private Connection conexion;
     
+    private String pathSk = "jdbc:sqlite:C:\\Users\\Sk\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db";
+    private String pathAlcaoliva = "jdbc:sqlite:C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db";
+    
     public ConexionBD() {
         conexion = null;
         try {
-            conexion = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db");
+            conexion = DriverManager.getConnection(pathSk);
         } catch (SQLException ex) {
             Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
         }
