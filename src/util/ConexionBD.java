@@ -50,6 +50,13 @@ public class ConexionBD {
     }
     
     public boolean insertQuery(String query) {
-        return false;
+        try {
+            PreparedStatement statement = conexion.prepareStatement(query);
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            Logger.getLogger(ConexionBD.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        return true;
     }
 }

@@ -27,6 +27,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import util.Cliente;
+import util.ConexionBD;
 
 /**
  * FXML Controller class
@@ -47,6 +48,7 @@ public class ListadoClientesController implements Initializable {
     @FXML private TableColumn columnaAsesor;
     
     private ObservableList<Cliente> data;
+    ConexionBD connection;
 
     /**
      * Initializes the controller class.
@@ -79,13 +81,10 @@ public class ListadoClientesController implements Initializable {
      * Llena el GridLayout con la tabla Clientes de la base de datos
      */
     private void fillClientes(){
-        Connection conn = connect();
-        ResultSet result;
-        int row = 0;
-        if (conn!=null){
+        connection = new ConexionBD();
+        ResultSet result = connection.selectQuery("SELECT * FROM Clientes");
+        if (result!=null) {
             try {
-                PreparedStatement st = conn.prepareStatement("SELECT * FROM Clientes");
-                result = st.executeQuery();
                 while (result.next()) {
                     String nombreCliente = result.getString("Nombre");
                     String apellidosCliente = result.getString("Apellidos");
@@ -97,43 +96,17 @@ public class ListadoClientesController implements Initializable {
                     String paisCliente = result.getString("Pais");
                     boolean necesitaAsesorCliente = (result.getInt("NecesitaAsesor") == 0)?false:true;
                     data.add(new Cliente(
-                        nombreCliente, apellidosCliente, DNICliente, direccionCliente, codigoPostal, localidadCliente, provinciaCliente, 
-                        paisCliente, necesitaAsesorCliente));
+                            nombreCliente, apellidosCliente, DNICliente, direccionCliente, codigoPostal, localidadCliente, provinciaCliente,
+                            paisCliente, necesitaAsesorCliente));   
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
             }
-            configureTable();
-            closeConnection(conn);
         }
+        configureTable();
+        connection.close();
     }
     
-    /**
-     * Crea la conexión a la BD
-     * @return La conexión a la BD
-     */
-    private Connection connect() {
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db");
-        } catch (SQLException ex) {
-            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
-    
-    /**
-     * Cierra la conexión con la BD
-     * @param conn Es la conexión a la BD
-     */
-    private void closeConnection(Connection conn){
-        try {
-            conn.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     /**
      * Configura el TableView asignando el tipo de valor a las columnas
      */
