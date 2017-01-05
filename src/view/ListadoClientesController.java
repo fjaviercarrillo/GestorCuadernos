@@ -77,6 +77,21 @@ public class ListadoClientesController implements Initializable {
         }
     }
     
+    @FXML private void updateUser() {
+        Stage secondStage = new Stage();
+        FXMLLoader loader = new FXMLLoader();
+        AnchorPane updateClienteLayout;
+        try{
+            loader.setLocation(getClass().getResource("/view/clientesViews/EditarCliente.fxml"));
+            updateClienteLayout = (AnchorPane) loader.load();
+            secondStage.setScene(new Scene(updateClienteLayout));
+            secondStage.setTitle("Editar cliente");
+            secondStage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     /**
      * Llena el GridLayout con la tabla Clientes de la base de datos
      */

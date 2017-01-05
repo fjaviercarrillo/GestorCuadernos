@@ -22,7 +22,7 @@ import util.ConexionBD;
  *
  * @author ALCAOLIVA
  */
-public class NuevoClienteController implements Initializable {
+public class EditarClienteController implements Initializable {
     // Variables para conexión con FXML
     @FXML private TextField textFieldNombre;
     @FXML private TextField textFieldApellidos;
@@ -45,7 +45,6 @@ public class NuevoClienteController implements Initializable {
     private String pais;
     private boolean necesitaAsesor;
     
-    private Cliente nuevoCliente;
     /**
      * Initializes the controller class.
      * @param url
@@ -79,13 +78,23 @@ public class NuevoClienteController implements Initializable {
             } else if (pais.compareTo("") == 0) {
                 showAlert("El país no puede estar vacío");
             } else {
-                addUserToBD();
+                updateUserInBD();
             }
         } else {
             showAlert("El código postal no es correcto (debe de ser numérico y no mayor de 5 dígitos");
         }
-        
-        
+    }
+    
+    public void setData(Cliente cliente) {
+        textFieldNombre.setText(cliente.getNombre());
+        textFieldApellidos.setText(cliente.getApellidos());
+        textFieldDNI.setText(cliente.getDNI());
+        textFieldDireccion.setText(cliente.getDireccion());
+        textFieldCP.setText(String.valueOf(cliente.getCodigoPostal()));
+        textFieldLocalidad.setText(cliente.getLocalidad());
+        textFieldProvincia.setText(cliente.getProvincia());
+        textFieldPais.setText(cliente.getPais());
+        checkBoxAsesor.setSelected(cliente.necesitaAsesor().get());
     }
     
     private void getFieldData() {
@@ -129,14 +138,14 @@ public class NuevoClienteController implements Initializable {
     /**
      * Añade el usuario a la base de datos
      */
-    private void addUserToBD() {
+    private void updateUserInBD() {
         ConexionBD connection = new ConexionBD();
         int intNecesitaAsesor = (necesitaAsesor) ? 1 : 0;
-        String updateQuery = "INSERT INTO Clientes (Nombre, Apellidos, DNI, Direccion, CP, Localidad, Provincia, Pais, NecesitaAsesor) "
-                + "VALUES ('" + nombre +"', '" + apellidos +"', '" + DNI +"', '" + direccion + "', " + CP + ", '" + localidad + "', "
-                + "'" + provincia + "', '" + pais + "', " + intNecesitaAsesor + ");";
+        String updateQuery = "UPDATE Clientes SET Nombre = '" + nombre + "', Apellidos = '" + apellidos + "', DNI = '" + DNI + "', "
+                + "Direccion = '" + direccion + "', CP = " + CP + ", Localidad = '" + localidad + "', Provincia = '" + provincia + "', "
+                + "Pais = '" + pais + "', NecesitaAsesor = " + intNecesitaAsesor;
         if (connection.executeQuery(updateQuery)) {
-            showAlert("Usuario creado con éxito");
+            showAlert("Usuario actualizado con éxito");
         } else {
             showAlert("Ha habido un error al crear el usuario");
         }
