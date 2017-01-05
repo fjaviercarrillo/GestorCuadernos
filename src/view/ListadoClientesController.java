@@ -28,7 +28,14 @@ public class ListadoClientesController implements Initializable {
     
     @FXML private TableView tablaDatos;
     @FXML private TableColumn columnaNombre;
-    private TableColumn columnaApellidos;
+    @FXML private TableColumn columnaApellidos;
+    @FXML private TableColumn columnaDNI;
+    @FXML private TableColumn columnaDireccion;
+    @FXML private TableColumn columnaCP;
+    @FXML private TableColumn columnaLocalidad;
+    @FXML private TableColumn columnaProvincia;
+    @FXML private TableColumn columnaPais;
+    @FXML private TableColumn columnaAsesor;
     
     private ObservableList<Cliente> data;
 
@@ -46,14 +53,25 @@ public class ListadoClientesController implements Initializable {
      */
     private void fillClientes(){
         Connection conn = connect();
-        ResultSet result = null;
+        ResultSet result;
         int row = 0;
         if (conn!=null){
             try {
                 PreparedStatement st = conn.prepareStatement("SELECT * FROM Clientes");
                 result = st.executeQuery();
                 while (result.next()) {
-                    data.add(new Cliente(result.getString("Nombre")));
+                    String nombreCliente = result.getString("Nombre");
+                    String apellidosCliente = result.getString("Apellidos");
+                    String DNICliente = result.getString("DNI");
+                    String direccionCliente = result.getString("Direccion");
+                    int codigoPostal = result.getInt("CP");
+                    String localidadCliente = result.getString("Localidad");
+                    String provinciaCliente = result.getString("Provincia");
+                    String paisCliente = result.getString("Pais");
+                    boolean necesitaAsesorCliente = result.getBoolean("NecesitaAsesor");
+                    data.add(new Cliente(
+                        nombreCliente, apellidosCliente, DNICliente, direccionCliente, codigoPostal, localidadCliente, provinciaCliente, 
+                        paisCliente, necesitaAsesorCliente));
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
@@ -82,8 +100,15 @@ public class ListadoClientesController implements Initializable {
 
     private void configureTable() {
         tablaDatos.setEditable(true);
-        columnaNombre.setCellValueFactory(
-            new PropertyValueFactory<Cliente, String>("nombre"));
+        columnaNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        columnaApellidos.setCellValueFactory(new PropertyValueFactory<>("apellidos"));
+        columnaDNI.setCellValueFactory(new PropertyValueFactory<>("DNI"));
+        columnaDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
+        columnaCP.setCellValueFactory(new PropertyValueFactory("codigoPostal"));
+        columnaLocalidad.setCellValueFactory(new PropertyValueFactory("localidad"));
+        columnaProvincia.setCellValueFactory(new PropertyValueFactory("provincia"));
+        columnaPais.setCellValueFactory(new PropertyValueFactory("pais"));
+        columnaAsesor.setCellValueFactory(new PropertyValueFactory("asesor"));
         tablaDatos.setItems(data);
     }
 }

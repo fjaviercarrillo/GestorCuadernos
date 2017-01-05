@@ -5,6 +5,8 @@
  */
 package util;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
@@ -13,100 +15,61 @@ import javafx.beans.property.SimpleStringProperty;
  */
 public class Cliente {
     private final SimpleStringProperty nombre;
-    
-    public static boolean CON_ASESOR = true;
-    public static boolean SIN_ASESOR = false;
-    private String apellidos;
-    private String DNI;
-    private String direccion;
-    private int codigoPostal;
-    private String localidad;
-    private String provincia;
-    private String pais;
-    private boolean asesor;
+    private final SimpleStringProperty apellidos;
+    private final SimpleStringProperty DNI;
+    private final SimpleStringProperty direccion;
+    private final SimpleIntegerProperty codigoPostal;
+    private final SimpleStringProperty localidad;
+    private final SimpleStringProperty provincia;
+    private final SimpleStringProperty pais;
+    private final SimpleBooleanProperty asesor;
     
     public Cliente(String nombre, String apellidos, String DNI, String direccion, int codigoPostal, String localidad, String provincia,
-            boolean asesor){
+            String pais, boolean asesor){
         this.nombre = new SimpleStringProperty(nombre);
-        this.apellidos = apellidos;
-        this.DNI = DNI;
-        this.direccion = direccion;
-        this.codigoPostal = codigoPostal;
-        this.localidad = localidad;
-        this.provincia = provincia;
-        this.pais = "ESPAÑA";
-        this.asesor = asesor;
-    }
-    
-    public Cliente(String nombre) {
-        this.nombre = new SimpleStringProperty(nombre);
-    }
-    
-    public void setAsesor(boolean asesor){
-        this.asesor = asesor;
+        this.apellidos = new SimpleStringProperty(apellidos);
+        this.DNI = new SimpleStringProperty(DNI);
+        this.direccion = new SimpleStringProperty(direccion);
+        this.codigoPostal = new SimpleIntegerProperty(codigoPostal);
+        this.localidad = new SimpleStringProperty(localidad);
+        this.provincia = new SimpleStringProperty(provincia);
+        this.pais = new SimpleStringProperty(pais);
+        this.asesor = new SimpleBooleanProperty(asesor);
     }
     
     public boolean necesitaAsesor(){
-        return asesor;
+        return asesor.get();
     }
     
     public String getNombre(){
         return nombre.get();
     }
     
-    public void setApellidos(String apellidos){
-        this.apellidos = apellidos;
-    }
-    
     public String getApellidos(){
-        return apellidos;
-    }
-    
-    public void setDNI(String DNI){
-        this.DNI = DNI;
+        return apellidos.get();
     }
     
     public String getDNI(){
-        return DNI;
-    }
-    
-    public void setDireccion(String direccion){
-        this.direccion = direccion;
+        return DNI.get();
     }
     
     public String getDireccion(){
-        return direccion;
-    }
-    
-    public void setCodigoPostal(int codigoPostal){
-        this.codigoPostal = codigoPostal;
+        return direccion.get();
     }
     
     public int getCodigoPostal(){
-        return codigoPostal;
-    }
-    
-    public void setLocalidad(String localidad){
-        this.localidad = localidad;
+        return codigoPostal.get();
     }
     
     public String getLocalidad(){
-        return localidad;
+        return localidad.get();
     }
-    
-    public void setProvincia(String provincia){
-        this.provincia = provincia;
-    }
-    
+ 
     public String getProvincia(){
-        return provincia;
-    }
-    
-    public void setPais(String pais){
-        this.pais = pais;
+        return provincia.get();
     }
     
     public String getPais(){
-        return pais;
+        return pais.get();
     }
 }

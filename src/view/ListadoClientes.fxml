@@ -10,7 +10,15 @@
    <children>
       <TableView fx:id="tablaDatos" prefHeight="70.0" prefWidth="1240.0" AnchorPane.bottomAnchor="410.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
          <columns>
-            <TableColumn fx:id="columnaNombre" prefWidth="75.0" text="Nombre" />
+            <TableColumn fx:id="columnaNombre" prefWidth="108.0" text="Nombre" />
+            <TableColumn fx:id="columnaApellidos" prefWidth="220.0" text="Apellidos" />
+            <TableColumn fx:id="columnaDNI" prefWidth="97.0" text="DNI" />
+            <TableColumn fx:id="columnaDireccion" prefWidth="268.0" text="Direccion" />
+            <TableColumn fx:id="columnaCP" minWidth="0.0" prefWidth="61.0" text="CP" />
+            <TableColumn fx:id="columnaLocalidad" prefWidth="185.0" text="Localidad" />
+            <TableColumn fx:id="columnaProvincia" prefWidth="139.0" text="Provincia" />
+            <TableColumn fx:id="columnaPais" prefWidth="110.0" text="Pais" />
+            <TableColumn fx:id="columnaAsesor" prefWidth="51.0" text="Asesor" />
          </columns></TableView>
    </children>
 </AnchorPane>
