@@ -37,8 +37,8 @@ public class Cliente {
         this.asesor = new SimpleBooleanProperty(asesor);
     }
     
-    public boolean necesitaAsesor(){
-        return asesor.get();
+    public SimpleBooleanProperty necesitaAsesor(){
+        return asesor;
     }
     
     public String getNombre(){

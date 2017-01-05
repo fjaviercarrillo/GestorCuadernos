@@ -5,18 +5,27 @@
  */
 package view;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import javafx.util.Callback;
 import util.Cliente;
 
 /**
@@ -49,6 +58,24 @@ public class ListadoClientesController implements Initializable {
     }  
     
     /**
+     * Crea una nueva ventana para introducir un usuario
+     */
+    @FXML private void createUser() {
+        Stage secondStage = new Stage();
+        FXMLLoader loader = new FXMLLoader();
+        AnchorPane nuevoClienteLayout;
+        try {
+            loader.setLocation(getClass().getResource("/view/clientesViews/NuevoCliente.fxml"));
+            nuevoClienteLayout = (AnchorPane) loader.load();
+            secondStage.setScene(new Scene(nuevoClienteLayout));
+            secondStage.setTitle("Nuevo cliente");
+            secondStage.show();
+        } catch (IOException ex) {
+            Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
      * Llena el GridLayout con la tabla Clientes de la base de datos
      */
     private void fillClientes(){
@@ -68,7 +95,7 @@ public class ListadoClientesController implements Initializable {
                     String localidadCliente = result.getString("Localidad");
                     String provinciaCliente = result.getString("Provincia");
                     String paisCliente = result.getString("Pais");
-                    boolean necesitaAsesorCliente = result.getBoolean("NecesitaAsesor");
+                    boolean necesitaAsesorCliente = (result.getInt("NecesitaAsesor") == 0)?false:true;
                     data.add(new Cliente(
                         nombreCliente, apellidosCliente, DNICliente, direccionCliente, codigoPostal, localidadCliente, provinciaCliente, 
                         paisCliente, necesitaAsesorCliente));
@@ -77,20 +104,29 @@ public class ListadoClientesController implements Initializable {
                 Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
             }
             configureTable();
+            closeConnection(conn);
         }
     }
     
+    /**
+     * Crea la conexión a la BD
+     * @return La conexión a la BD
+     */
     private Connection connect() {
         Connection conn = null;
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:/cuadernoDB.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db");
         } catch (SQLException ex) {
             Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
         }
         return conn;
     }
     
-    private void close(Connection conn){
+    /**
+     * Cierra la conexión con la BD
+     * @param conn Es la conexión a la BD
+     */
+    private void closeConnection(Connection conn){
         try {
             conn.close();
         } catch (SQLException ex) {
@@ -98,17 +134,27 @@ public class ListadoClientesController implements Initializable {
         }
     }
 
+    /**
+     * Configura el TableView asignando el tipo de valor a las columnas
+     */
     private void configureTable() {
-        tablaDatos.setEditable(true);
+        //tablaDatos.setEditable(true);
         columnaNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         columnaApellidos.setCellValueFactory(new PropertyValueFactory<>("apellidos"));
         columnaDNI.setCellValueFactory(new PropertyValueFactory<>("DNI"));
         columnaDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
-        columnaCP.setCellValueFactory(new PropertyValueFactory("codigoPostal"));
-        columnaLocalidad.setCellValueFactory(new PropertyValueFactory("localidad"));
-        columnaProvincia.setCellValueFactory(new PropertyValueFactory("provincia"));
-        columnaPais.setCellValueFactory(new PropertyValueFactory("pais"));
-        columnaAsesor.setCellValueFactory(new PropertyValueFactory("asesor"));
+        columnaCP.setCellValueFactory(new PropertyValueFactory<>("codigoPostal"));
+        columnaLocalidad.setCellValueFactory(new PropertyValueFactory<>("localidad"));
+        columnaProvincia.setCellValueFactory(new PropertyValueFactory<>("provincia"));
+        columnaPais.setCellValueFactory(new PropertyValueFactory<>("pais"));
+        columnaAsesor.setCellValueFactory(
+            new Callback<CellDataFeatures<Cliente, Boolean>, ObservableValue<Boolean>>(){
+                @Override
+                public ObservableValue<Boolean> call(CellDataFeatures<Cliente, Boolean> param) {
+                    return param.getValue().necesitaAsesor();
+                }
+            });
+        columnaAsesor.setCellFactory(CheckBoxTableCell.forTableColumn(columnaAsesor));
         tablaDatos.setItems(data);
     }
 }

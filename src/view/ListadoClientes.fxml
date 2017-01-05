@@ -20,5 +20,12 @@
             <TableColumn fx:id="columnaPais" prefWidth="110.0" text="Pais" />
             <TableColumn fx:id="columnaAsesor" prefWidth="51.0" text="Asesor" />
          </columns></TableView>
+      <HBox layoutX="1079.0" layoutY="461.0" spacing="20.0">
+         <children>
+            <Button layoutX="971.0" layoutY="430.0" mnemonicParsing="false" onAction="#createUser" text="Nuevo" />
+            <Button layoutX="1049.0" layoutY="430.0" mnemonicParsing="false" text="Editar" />
+            <Button layoutX="1117.0" layoutY="430.0" mnemonicParsing="false" text="Borrar" />
+         </children>
+      </HBox>
    </children>
 </AnchorPane>

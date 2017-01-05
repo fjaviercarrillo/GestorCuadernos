@@ -58,7 +58,7 @@ public class Main extends Application {
             mainStage.setScene(scene);
             mainStage.setTitle("Gestor de cuadernos de explotación agrícola");
             mainStage.show();
-            mainStage.setMaximized(true);
+            //mainStage.setMaximized(true);
         } catch (IOException ex) {
             System.out.println(ex);
         }
