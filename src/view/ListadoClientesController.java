@@ -28,6 +28,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import util.Cliente;
 import util.ConexionBD;
+import view.clientesViews.EditarClienteController;
 
 /**
  * FXML Controller class
@@ -77,15 +78,30 @@ public class ListadoClientesController implements Initializable {
         }
     }
     
-    @FXML private void updateUser() {
-        Stage secondStage = new Stage();
-        FXMLLoader loader = new FXMLLoader();
-        AnchorPane updateClienteLayout;
+    @FXML private void handleUpdateCliente() {
+        Cliente selectedClient;
+        selectedClient = (Cliente) tablaDatos.getSelectionModel().getSelectedItem();
+        if (selectedClient!=null) {
+            updateUserDialog(selectedClient);
+        }
+    }
+    
+    private void updateUserDialog(Cliente cliente) {
         try{
+            // Carga el archivo fxml y crea un nuevo stage
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/view/clientesViews/EditarCliente.fxml"));
-            updateClienteLayout = (AnchorPane) loader.load();
-            secondStage.setScene(new Scene(updateClienteLayout));
+            AnchorPane updateClienteLayout = (AnchorPane) loader.load();
+            
+            // Crea la nueva ventana
+            Stage secondStage = new Stage();
             secondStage.setTitle("Editar cliente");
+            Scene scene = new Scene(updateClienteLayout);
+            secondStage.setScene(scene);
+            
+            //Pasa el cliente al controlador
+            EditarClienteController controller = loader.getController();
+            controller.setData(cliente);
             secondStage.show();
         } catch (IOException ex) {
             Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
