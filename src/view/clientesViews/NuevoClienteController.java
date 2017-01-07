@@ -141,6 +141,7 @@ public class NuevoClienteController implements Initializable {
             showAlert("Ha habido un error al crear el usuario");
         }
         connection.close();
+        closeWindow();
     }
     
     /**

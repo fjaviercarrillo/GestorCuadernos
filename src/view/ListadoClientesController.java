@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import java.sql.*;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.value.ObservableValue;
@@ -18,11 +19,16 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -72,7 +78,10 @@ public class ListadoClientesController implements Initializable {
             nuevoClienteLayout = (AnchorPane) loader.load();
             secondStage.setScene(new Scene(nuevoClienteLayout));
             secondStage.setTitle("Nuevo cliente");
-            secondStage.show();
+            secondStage.showAndWait();
+            
+            data.clear();
+            fillClientes();
         } catch (IOException ex) {
             Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -102,7 +111,10 @@ public class ListadoClientesController implements Initializable {
             //Pasa el cliente al controlador
             EditarClienteController controller = loader.getController();
             controller.setData(cliente);
-            secondStage.show();
+            secondStage.showAndWait();
+            
+            data.clear();
+            fillClientes();
         } catch (IOException ex) {
             Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -112,6 +124,7 @@ public class ListadoClientesController implements Initializable {
      * Llena el GridLayout con la tabla Clientes de la base de datos
      */
     private void fillClientes(){
+        // Conectamos a la base de datos para rellenar la tabla con los clientes existentes
         connection = new ConexionBD();
         ResultSet result = connection.selectQuery("SELECT * FROM Clientes");
         if (result!=null) {
@@ -125,10 +138,28 @@ public class ListadoClientesController implements Initializable {
                     String localidadCliente = result.getString("Localidad");
                     String provinciaCliente = result.getString("Provincia");
                     String paisCliente = result.getString("Pais");
+                    int idCliente = result.getInt("id");
                     boolean necesitaAsesorCliente = (result.getInt("NecesitaAsesor") == 0)?false:true;
+                    
+                    // Añadimos una nueva fila a la tabla con un objeto cliente
                     data.add(new Cliente(
                             nombreCliente, apellidosCliente, DNICliente, direccionCliente, codigoPostal, localidadCliente, provinciaCliente,
-                            paisCliente, necesitaAsesorCliente));   
+                            paisCliente, necesitaAsesorCliente, idCliente));   
+                    
+                    // Añadimos un listener a cada fila para cuando hacemos doble click
+                    tablaDatos.setRowFactory(tv -> {
+                        TableRow<Cliente> row = new TableRow<>();
+                        row.setOnMouseClicked(event -> {
+                            if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                                updateUserDialog(row.getItem());
+                            } else {
+                                if (event.getClickCount() == 2 && (row.isEmpty())) {
+                                    createUser();
+                                }
+                            }
+                        });
+                        return row;
+                    });
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
@@ -160,5 +191,39 @@ public class ListadoClientesController implements Initializable {
             });
         columnaAsesor.setCellFactory(CheckBoxTableCell.forTableColumn(columnaAsesor));
         tablaDatos.setItems(data);
+        tablaDatos.setOnKeyPressed(tv -> {
+            KeyCode key = tv.getCode();
+            if (key.equals(KeyCode.ENTER)) {
+                updateUserDialog((Cliente) tablaDatos.getSelectionModel().getSelectedItem());
+            } else {
+                if (key.equals(KeyCode.DELETE)) {
+                    deleteCliente();
+                }
+            }
+        });
+    }
+    
+    @FXML private void deleteCliente() {
+        Cliente client = (Cliente) tablaDatos.getSelectionModel().getSelectedItem();
+        if (client != null) {
+            if (confirmDialog(client.getNombre(), client.getApellidos())) {
+                ConexionBD connection = new ConexionBD();
+                String query = "DELETE FROM Clientes WHERE Id = " + client.getIdCliente();
+                connection.executeQuery(query);
+                connection.close();
+                data.clear();
+                fillClientes();
+            }            
+        }
+    }
+
+    private boolean confirmDialog(String nombre, String apellidos) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Borrar cliente");
+        alert.setHeaderText("Borrar cliente");
+        alert.setContentText("¿Está seguro de que quiere borrar al cliente " + nombre + " " + apellidos + "?");
+        
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.get() == ButtonType.OK;
     }
 }

@@ -24,7 +24,7 @@
          <children>
             <Button layoutX="971.0" layoutY="430.0" mnemonicParsing="false" onAction="#createUser" text="Nuevo" />
             <Button layoutX="1049.0" layoutY="430.0" mnemonicParsing="false" onAction="#handleUpdateCliente" text="Editar" />
-            <Button layoutX="1117.0" layoutY="430.0" mnemonicParsing="false" text="Borrar" />
+            <Button layoutX="1117.0" layoutY="430.0" mnemonicParsing="false" onAction="#deleteCliente" text="Borrar" />
          </children>
       </HBox>
    </children>

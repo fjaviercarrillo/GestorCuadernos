@@ -23,9 +23,10 @@ public class Cliente {
     private final SimpleStringProperty provincia;
     private final SimpleStringProperty pais;
     private final SimpleBooleanProperty asesor;
+    private int idCliente;
     
     public Cliente(String nombre, String apellidos, String DNI, String direccion, int codigoPostal, String localidad, String provincia,
-            String pais, boolean asesor){
+            String pais, boolean asesor, int id){
         this.nombre = new SimpleStringProperty(nombre);
         this.apellidos = new SimpleStringProperty(apellidos);
         this.DNI = new SimpleStringProperty(DNI);
@@ -35,6 +36,7 @@ public class Cliente {
         this.provincia = new SimpleStringProperty(provincia);
         this.pais = new SimpleStringProperty(pais);
         this.asesor = new SimpleBooleanProperty(asesor);
+        this.idCliente = id;
     }
     
     public SimpleBooleanProperty necesitaAsesor(){
@@ -72,5 +74,9 @@ public class Cliente {
     
     public String getPais(){
         return pais.get();
+    }
+
+    public int getIdCliente() {
+        return idCliente;
     }
 }

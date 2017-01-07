@@ -44,6 +44,7 @@ public class EditarClienteController implements Initializable {
     private String provincia;
     private String pais;
     private boolean necesitaAsesor;
+    private int idCliente;
     
     /**
      * Initializes the controller class.
@@ -95,6 +96,7 @@ public class EditarClienteController implements Initializable {
         textFieldProvincia.setText(cliente.getProvincia());
         textFieldPais.setText(cliente.getPais());
         checkBoxAsesor.setSelected(cliente.necesitaAsesor().get());
+        this.idCliente = cliente.getIdCliente();
     }
     
     private void getFieldData() {
@@ -143,13 +145,14 @@ public class EditarClienteController implements Initializable {
         int intNecesitaAsesor = (necesitaAsesor) ? 1 : 0;
         String updateQuery = "UPDATE Clientes SET Nombre = '" + nombre + "', Apellidos = '" + apellidos + "', DNI = '" + DNI + "', "
                 + "Direccion = '" + direccion + "', CP = " + CP + ", Localidad = '" + localidad + "', Provincia = '" + provincia + "', "
-                + "Pais = '" + pais + "', NecesitaAsesor = " + intNecesitaAsesor;
+                + "Pais = '" + pais + "', NecesitaAsesor = " + intNecesitaAsesor + " WHERE Id = " + idCliente;
         if (connection.executeQuery(updateQuery)) {
             showAlert("Usuario actualizado con éxito");
         } else {
             showAlert("Ha habido un error al crear el usuario");
         }
         connection.close();
+        closeWindow();
     }
     
     /**
