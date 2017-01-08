@@ -97,7 +97,7 @@ public class ListadoClientesController implements Initializable {
     
     private void updateUserDialog(Cliente cliente) {
         try{
-            // Carga el archivo fxml y crea un nuevo stage
+            // Carga el archivo fxml
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/view/clientesViews/EditarCliente.fxml"));
             AnchorPane updateClienteLayout = (AnchorPane) loader.load();

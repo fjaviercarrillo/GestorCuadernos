@@ -6,6 +6,8 @@
 package application;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -76,9 +78,26 @@ public class Main extends Application {
             AnchorPane.setLeftAnchor(listadoClientesLayout, 0.0);
             AnchorPane.setRightAnchor(listadoClientesLayout, 0.0);
             AnchorPane.setTopAnchor(listadoClientesLayout, 0.0);
+            bodyPane.getChildren().clear();
             bodyPane.getChildren().add(listadoClientesLayout);
         } catch (IOException ex) {
             System.out.println(ex);
+        }
+    }
+    
+    @FXML public void onDeclaracionClicked() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/view/ListadoDeclaraciones.fxml"));
+            AnchorPane listadoDeclaracionesLayout = (AnchorPane) loader.load();
+            AnchorPane.setBottomAnchor(listadoDeclaracionesLayout, 0.0);
+            AnchorPane.setLeftAnchor(listadoDeclaracionesLayout, 0.0);
+            AnchorPane.setRightAnchor(listadoDeclaracionesLayout, 0.0);
+            AnchorPane.setTopAnchor(listadoDeclaracionesLayout, 0.0);
+            bodyPane.getChildren().clear();
+            bodyPane.getChildren().add(listadoDeclaracionesLayout);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
