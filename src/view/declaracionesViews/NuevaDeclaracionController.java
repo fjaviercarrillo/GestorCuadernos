@@ -5,11 +5,15 @@
  */
 package view.declaracionesViews;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import util.Cliente;
 
 /**
@@ -20,6 +24,8 @@ import util.Cliente;
 public class NuevaDeclaracionController implements Initializable {
 
     private Cliente cliente;
+    private Stage stage;
+    File fileDeclaracion;
     
     @FXML Label nombreCliente;
     
@@ -28,15 +34,19 @@ public class NuevaDeclaracionController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
+        fileDeclaracion = null;
     }    
     
-    public void setData(Cliente cliente) {
+    public void setData(Cliente cliente, Stage stage) {
         this.cliente = cliente;
         nombreCliente.setText(cliente.getNombre() + " " + cliente.getApellidos());
+        this.stage = stage;
     }
     
     @FXML public void openFileDialog() {
-        
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Selecciona una imagen");
+        fileChooser.getExtensionFilters().add(new ExtensionFilter("Imágenes", "*.jpg"));
+        fileDeclaracion = fileChooser.showOpenDialog(stage);
     }
 }

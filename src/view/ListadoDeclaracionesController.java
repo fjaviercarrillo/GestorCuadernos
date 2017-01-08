@@ -108,7 +108,7 @@ public class ListadoDeclaracionesController implements Initializable {
                 secondStage.setScene(scene);
                 
                 NuevaDeclaracionController controller = loader.getController();
-                controller.setData((Cliente) listaResultados.getSelectionModel().getSelectedItem());
+                controller.setData((Cliente) listaResultados.getSelectionModel().getSelectedItem(), secondStage);
                 
                 secondStage.showAndWait();
             } catch (IOException ex) {
