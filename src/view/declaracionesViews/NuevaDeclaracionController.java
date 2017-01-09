@@ -12,6 +12,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -31,6 +34,9 @@ public class NuevaDeclaracionController implements Initializable {
     private ObservableList<Parcela> datosDeclaraciones;
     
     @FXML Label nombreCliente;
+    @FXML TableColumn columnaIdParcela;
+    @FXML TableColumn columnaSizeParcela;
+    @FXML TableView tablaDatos;
     
     /**
      * Initializes the controller class.
@@ -38,6 +44,7 @@ public class NuevaDeclaracionController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         fileDeclaracion = null;
+        configureTable();
     }    
     
     public void setData(Cliente cliente, Stage stage) {
@@ -51,5 +58,11 @@ public class NuevaDeclaracionController implements Initializable {
         fileChooser.setTitle("Selecciona una imagen");
         fileChooser.getExtensionFilters().add(new ExtensionFilter("Imágenes", "*.jpg"));
         fileDeclaracion = fileChooser.showOpenDialog(stage);
+    }
+    
+    private void configureTable() {
+        columnaIdParcela.setCellValueFactory(new PropertyValueFactory<>("idParcela"));
+        columnaSizeParcela.setCellValueFactory(new PropertyValueFactory<>("sizeParcela"));
+        tablaDatos.setItems(datosDeclaraciones);
     }
 }

@@ -14,7 +14,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <TableView layoutX="14.0" layoutY="117.0" prefHeight="414.0" prefWidth="191.0">
+      <TableView editable="true" layoutX="14.0" layoutY="117.0" prefHeight="414.0" prefWidth="191.0">
         <columns>
           <TableColumn prefWidth="92.0" text="Id Parcela" />
           <TableColumn prefWidth="98.0" text="Tamaño" />
