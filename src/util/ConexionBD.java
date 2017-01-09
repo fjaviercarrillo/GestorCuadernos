@@ -27,7 +27,7 @@ public class ConexionBD {
     public ConexionBD() {
         conexion = null;
         try {
-            conexion = DriverManager.getConnection(pathSk);
+            conexion = DriverManager.getConnection(pathAlcaoliva);
         } catch (SQLException ex) {
             Logger.getLogger(ListadoClientesController.class.getName()).log(Level.SEVERE, null, ex);
         }

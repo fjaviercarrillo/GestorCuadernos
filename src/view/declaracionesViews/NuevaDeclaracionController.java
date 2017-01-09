@@ -8,6 +8,7 @@ package view.declaracionesViews;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -15,6 +16,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import util.Cliente;
+import util.Parcela;
 
 /**
  * FXML Controller class
@@ -26,6 +28,7 @@ public class NuevaDeclaracionController implements Initializable {
     private Cliente cliente;
     private Stage stage;
     File fileDeclaracion;
+    private ObservableList<Parcela> datosDeclaraciones;
     
     @FXML Label nombreCliente;
     
