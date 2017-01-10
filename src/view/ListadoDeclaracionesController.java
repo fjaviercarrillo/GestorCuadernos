@@ -138,7 +138,7 @@ public class ListadoDeclaracionesController implements Initializable {
             String text = textBusqueda.getText();
             String query = "SELECT Nombre, Apellidos, DNI, Direccion, CP, Localidad, Provincia, Pais, id, NecesitaAsesor, "
                     + "(Nombre||' '||Apellidos) as Cliente "
-                    + "FROM Clientes WHERE Nombre||' '||Apellidos LIKE '" + text + "%'";
+                    + "FROM Clientes WHERE Nombre||' '||Apellidos LIKE '%" + text + "%'";
             ResultSet result = connection.selectQuery(query);
             lista = new ArrayList<>();
             while (result.next()) {

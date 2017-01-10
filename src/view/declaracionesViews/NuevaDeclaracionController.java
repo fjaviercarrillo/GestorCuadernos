@@ -7,6 +7,7 @@ package view.declaracionesViews;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -44,12 +45,12 @@ public class NuevaDeclaracionController implements Initializable {
     private File fileDeclaracion;
     private int rowCounter;
     private Scene sceneOwner;
+    private ArrayList<Parcela> listaParcelas;
     
     @FXML Label nombreCliente;
-    @FXML TextField idParcela1;
-    @FXML TextField sizeParcela1;
-    @FXML Button btnAddRow1;
     @FXML GridPane grid;
+    @FXML TextField totalSizeTextField;
+    @FXML Label nombreFichero;
     
     /**
      * Initializes the controller class.
@@ -57,10 +58,19 @@ public class NuevaDeclaracionController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         fileDeclaracion = null;
-        rowCounter = 2;
+        rowCounter = 1;
+        listaParcelas = new ArrayList<>();
+        totalSizeTextField.setText("0.0");
+        addRow();
         
     }    
     
+    /**
+     * Crea los datos principales de la ventana
+     * @param cliente Es el cliente al que se le asignará la declaración de cultivo
+     * @param stage Es la escena que se ha creado
+     * @param scene Es la ventana que contiene la escena
+     */
     public void setData(Cliente cliente, Stage stage, Scene scene) {
         this.cliente = cliente;
         nombreCliente.setText(cliente.getNombre() + " " + cliente.getApellidos());
@@ -68,71 +78,133 @@ public class NuevaDeclaracionController implements Initializable {
         this.sceneOwner = scene;
     }
     
+    /**
+     * Abre el cuadro de diálogo para escoger un archivo
+     */
     @FXML private void openFileDialog() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Selecciona una imagen");
         fileChooser.getExtensionFilters().add(new ExtensionFilter("Imágenes", "*.jpg"));
         fileDeclaracion = fileChooser.showOpenDialog(stage);
+        nombreFichero.setText(fileDeclaracion.getName());
     }
-     private void addListenerToTextField(TextField textField, boolean last) {
-         if (last) {
-             
-         } 
-     }
      
-     @FXML private void addRow() {
-         String counterId = String.valueOf(rowCounter);
-         
-         // Creamos los campos de texto y el botón
-         TextField textFieldId = new TextField();
-         textFieldId.setId("id"+counterId);
-         TextField textFieldSize = new TextField();
-         textFieldSize.setId("size"+counterId);
-         Button buttonAdd = new Button("Add");
-         buttonAdd.setId("button"+counterId);
-         
-         // Añadimos el evento que cree una nueva fila al pulsar el botón
-         buttonAdd.setOnAction(new EventHandler<ActionEvent>() {
-             @Override public void handle(ActionEvent e) {
-                 addRow();
-             }
-         });
-         
-         // Añadimos el evento que mueve el foco al pulsar el tabulador
-         textFieldId.setOnKeyPressed(textField -> {
-             KeyCode key = textField.getCode();
-             if (key == KeyCode.TAB) {
-                 TextField focusedNode = (TextField) sceneOwner.getFocusOwner();
-                 String focusedId = focusedNode.getId();
-                 TextField nextFocusedNode = (TextField) sceneOwner.lookup("#size"+focusedId);
-                 nextFocusedNode.requestFocus();
-             }
-         });
-         
+    /**
+     * Añade una nueva fila al GridPane
+     */
+    @FXML private void addRow() {
+        String counterId = String.valueOf(rowCounter);
+
+        // Creamos los campos de texto y el botón
+        TextField textFieldId = new TextField();
+        textFieldId.setId("id"+counterId);
+        TextField textFieldSize = new TextField();
+        textFieldSize.setId("size"+counterId);
+        Button buttonAdd = new Button("Add");
+        buttonAdd.setId("button"+counterId);
+        
+        // Añadimos los distintos listeners para los objetos de cada fila
+        addRowListeners(textFieldId, textFieldSize, buttonAdd);
+        
+        // Añadimos los elementos creados al GridPane
+        addToGridPane(textFieldId, textFieldSize, buttonAdd);
+    }
+    
+    /**
+     * Añade los diferentes listeners a los objetos de cada línea
+     * @param textFieldId TextField con la id de la parcela
+     * @param textFieldSize TextField con el tamaño de la parcela
+     * @param buttonAdd Button para añadir nuevas líneas
+     */
+    private void addRowListeners(TextField textFieldId, TextField textFieldSize, Button buttonAdd) {
+        buttonAdd.setOnAction((ActionEvent e) -> {
+            addRow();
+        });
+        
+        buttonAdd.setOnKeyPressed(button -> {
+            KeyCode key = button.getCode();
+            if (key == KeyCode.ENTER) {
+                // Cuando se le de a intro se crea una nueva línea
+                addRow();
+                
+                // Averiguamos el botón pulsado y sacamos los valores de los TextField de esa misma línea
+                Button focusedNode = (Button) sceneOwner.getFocusOwner();
+                String focusedRow = focusedNode.getId().substring(6);
+                int idParcela = Integer.parseInt(((TextField) sceneOwner.lookup("#id"+focusedRow)).getText());
+                double sizeParcela = Double.parseDouble(((TextField) sceneOwner.lookup("#size"+focusedRow)).getText());
+                
+                // Añadimos el valor de los TextField de la línea n a un array de parcelas
+                listaParcelas.add(new Parcela(idParcela, sizeParcela));
+                
+                // Cambiamos el foco al primer TextField de la nueva fila
+                int focused = Integer.parseInt(focusedRow);
+                focusedRow = String.valueOf(focused + 1);
+                TextField nextFocusedNode = (TextField) sceneOwner.lookup("#id"+focusedRow);
+                nextFocusedNode.requestFocus();
+                
+                putTotalSize();
+            }
+        });
+
+        // Añadimos el evento que mueve el foco al pulsar el tabulador
+        textFieldId.setOnKeyPressed(textField -> {
+            KeyCode key = textField.getCode();
+            if (key == KeyCode.TAB || key == KeyCode.ENTER) {
+                TextField focusedNode = (TextField) sceneOwner.getFocusOwner();
+                String focusedId = focusedNode.getId().substring(2);
+                TextField nextFocusedNode = (TextField) sceneOwner.lookup("#size"+focusedId);
+                nextFocusedNode.requestFocus();
+            }
+        });
+
         textFieldSize.setOnKeyPressed(textField -> {
             KeyCode key = textField.getCode();
-            if (key == KeyCode.TAB) {
+            if (key == KeyCode.TAB || key == KeyCode.ENTER) {
                 TextField focusedNode = (TextField) sceneOwner.getFocusOwner();
-                String focusedId = focusedNode.getId();
+                String focusedId = focusedNode.getId().substring(4);
                 Button nextFocusedNode = (Button) sceneOwner.lookup("#button"+focusedId);
                 nextFocusedNode.requestFocus();
             }
         });
-         GridPane.setRowIndex(textFieldId, rowCounter);
-         GridPane.setColumnIndex(textFieldId, 0);
-         GridPane.setValignment(textFieldId, VPos.CENTER);
-         GridPane.setHalignment(textFieldId, HPos.CENTER);
-         
-         GridPane.setRowIndex(textFieldSize, rowCounter);
-         GridPane.setColumnIndex(textFieldSize, 1);
-         GridPane.setValignment(textFieldSize, VPos.CENTER);
-         GridPane.setHalignment(textFieldSize, HPos.CENTER);
-         
-         GridPane.setRowIndex(buttonAdd, rowCounter);
-         GridPane.setColumnIndex(buttonAdd, 2);
-         GridPane.setValignment(buttonAdd, VPos.CENTER);
-         GridPane.setHalignment(buttonAdd, HPos.CENTER);
-         grid.getChildren().addAll(textFieldId, textFieldSize, buttonAdd);
-         rowCounter++;
-     }
+    }
+    
+    /**
+     * Añade los elementos al GridPane
+     * @param textFieldId Un TextField con la id de la parcela
+     * @param textFieldSize Un TextField con el tamaño de la parcela
+     * @param buttonAdd Un Button para añadir nuevas líneas al GridPane
+     */
+    private void addToGridPane(TextField textFieldId, TextField textFieldSize, Button buttonAdd) {
+        GridPane.setRowIndex(textFieldId, rowCounter);
+        GridPane.setColumnIndex(textFieldId, 0);
+        GridPane.setValignment(textFieldId, VPos.CENTER);
+        GridPane.setHalignment(textFieldId, HPos.CENTER);
+
+        GridPane.setRowIndex(textFieldSize, rowCounter);
+        GridPane.setColumnIndex(textFieldSize, 1);
+        GridPane.setValignment(textFieldSize, VPos.CENTER);
+        GridPane.setHalignment(textFieldSize, HPos.CENTER);
+
+        GridPane.setRowIndex(buttonAdd, rowCounter);
+        GridPane.setColumnIndex(buttonAdd, 2);
+        GridPane.setValignment(buttonAdd, VPos.CENTER);
+        GridPane.setHalignment(buttonAdd, HPos.CENTER);
+        grid.getChildren().addAll(textFieldId, textFieldSize, buttonAdd);
+        rowCounter++;
+    }
+    
+    /**
+     * Rellena el campo con el tamaño total de la declaración de cultivo
+     */
+    private void putTotalSize() {
+        double totalSize = 0.0;
+        for (int i=0; i<listaParcelas.size(); i++) {
+            totalSize += listaParcelas.get(i).getSizeParcela().get();
+        }
+        totalSizeTextField.setText(String.valueOf(totalSize));
+    }
+    
+    @FXML private void crearDeclaracion() {
+        
+    }
 }
