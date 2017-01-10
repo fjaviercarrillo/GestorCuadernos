@@ -21,11 +21,11 @@ public class Parcela {
         this.sizeParcela = new SimpleDoubleProperty(sizeParcela);
     }
     
-    public int getIdParcela() {
-        return idParcela.get();
+    public SimpleIntegerProperty getIdParcela() {
+        return idParcela;
     }
     
-    public double getSizeParcela() {
-        return sizeParcela.get();
+    public SimpleDoubleProperty getSizeParcela() {
+        return sizeParcela;
     }
 }
