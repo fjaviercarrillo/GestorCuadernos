@@ -253,25 +253,7 @@ public class NuevaDeclaracionController implements Initializable {
             }
             
             // Creamos una lista de objetos Parcela con los datos introducidos por el usuario
-            for (int i=0; i<rowCounter; i++) {
-                int idParcela;
-                double sizeParcela;
-                boolean exists = false;
-                idParcela = Integer.parseInt(((TextField) sceneOwner.lookup("#id"+i)).getText());
-                sizeParcela = Double.parseDouble(((TextField) sceneOwner.lookup("#size"+i)).getText());
-                for (int j=0; j<listaParcelas.size(); i++) {
-                    Parcela parcelaTemp = listaParcelas.get(j);
-                    if (parcelaTemp.getIdParcela().get() == idParcela) {
-                        parcelaTemp.addToSizeParcela(sizeParcela);
-                        exists = true;
-                    }
-                }
-                if (!exists) {
-                    Parcela nuevaParcela;
-                    nuevaParcela = new Parcela(idParcela, sizeParcela);
-                    listaParcelas.add(nuevaParcela);
-                }
-            }
+            populateParcelaList();
         } catch (IOException ex) {
             dialogAlert("Ha habido un error al copiar la imagen");
         } catch (NullPointerException ex) {
@@ -290,6 +272,28 @@ public class NuevaDeclaracionController implements Initializable {
             Files.copy(filePath, newPath, REPLACE_EXISTING, COPY_ATTRIBUTES, NOFOLLOW_LINKS);           
         } else {
             throw new NullPointerException();
+        }
+    }
+    
+    private void populateParcelaList() {
+        for (int i=0; i<rowCounter; i++) {
+            int idParcela;
+            double sizeParcela;
+            boolean exists = false;
+            idParcela = Integer.parseInt(((TextField) sceneOwner.lookup("#id"+i)).getText());
+            sizeParcela = Double.parseDouble(((TextField) sceneOwner.lookup("#size"+i)).getText());
+            for (int j=0; j<listaParcelas.size(); i++) {
+                Parcela parcelaTemp = listaParcelas.get(j);
+                if (parcelaTemp.getIdParcela().get() == idParcela) {
+                    parcelaTemp.addToSizeParcela(sizeParcela);
+                    exists = true;
+                }
+            }
+            if (!exists) {
+                Parcela nuevaParcela;
+                nuevaParcela = new Parcela(idParcela, sizeParcela);
+                listaParcelas.add(nuevaParcela);
+            }
         }
     }
     
