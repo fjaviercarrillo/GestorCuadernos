@@ -5,10 +5,20 @@
  */
 package view.declaracionesViews;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,6 +42,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import util.Cliente;
 import util.Parcela;
+import application.Main;
+import javafx.scene.control.Alert;
 
 /**
  * FXML Controller class
@@ -42,15 +54,21 @@ public class NuevaDeclaracionController implements Initializable {
 
     private Cliente cliente;
     private Stage stage;
-    private File fileDeclaracion;
+    private File fileDeclaracion, fileDeclaracion2;
     private int rowCounter;
     private Scene sceneOwner;
     private ArrayList<Parcela> listaParcelas;
+    private final String imgDeclaracionesPath = "\\img\\declaraciones";
     
     @FXML Label nombreCliente;
     @FXML GridPane grid;
     @FXML TextField totalSizeTextField;
     @FXML Label nombreFichero;
+    @FXML Label labelImagen2;
+    @FXML Label nombreFichero2;
+    @FXML Button buttonFichero;
+    @FXML Button buttonFichero2;
+    @FXML Button buttonAddImage;
     
     /**
      * Initializes the controller class.
@@ -58,11 +76,12 @@ public class NuevaDeclaracionController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         fileDeclaracion = null;
+        fileDeclaracion2 = null;
         rowCounter = 1;
         listaParcelas = new ArrayList<>();
         totalSizeTextField.setText("0.0");
         addRow();
-        
+        addButtonFileListeners();
     }    
     
     /**
@@ -81,12 +100,39 @@ public class NuevaDeclaracionController implements Initializable {
     /**
      * Abre el cuadro de diálogo para escoger un archivo
      */
-    @FXML private void openFileDialog() {
+    @FXML private void openFileDialog(boolean isFirst) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Selecciona una imagen");
         fileChooser.getExtensionFilters().add(new ExtensionFilter("Imágenes", "*.jpg"));
-        fileDeclaracion = fileChooser.showOpenDialog(stage);
-        nombreFichero.setText(fileDeclaracion.getName());
+        if (isFirst) {
+            fileDeclaracion = fileChooser.showOpenDialog(stage);
+            nombreFichero.setText(fileDeclaracion.getName());
+        } else {
+            fileDeclaracion2 = fileChooser.showOpenDialog(stage);
+            nombreFichero2.setText(fileDeclaracion2.getName());
+        }
+    }
+    
+    /**
+     * Crea un listener para cada button
+     */
+    private void addButtonFileListeners() {
+        buttonFichero.setOnAction((ActionEvent e) -> {
+            openFileDialog(true);
+        });
+        buttonFichero2.setOnAction((ActionEvent e) -> {
+            openFileDialog(false);
+        });
+    }
+    
+    /**
+     * Muestra los controles para añadir una nueva imagen
+     */
+    @FXML private void addNewImage() {
+        labelImagen2.setOpacity(100.0);
+        nombreFichero2.setOpacity(100.0);
+        buttonFichero2.setOpacity(100.0);
+        buttonAddImage.setOpacity(0.0);
     }
      
     /**
@@ -204,7 +250,39 @@ public class NuevaDeclaracionController implements Initializable {
         totalSizeTextField.setText(String.valueOf(totalSize));
     }
     
+    /**
+     * Aceptamos la declaración, copiamos las imágenes y agregamos datos a la BD
+     */
     @FXML private void crearDeclaracion() {
-        
+        try {
+            copyImages(fileDeclaracion);
+            if (fileDeclaracion2 != null)
+                copyImages(fileDeclaracion2);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (NullPointerException ex) {
+            dialogAlert("Debes escoger una imagen para la declaración de cultivo");
+        }
+    }
+    
+    /**
+     * Copia la imagen al directorio general de imágenes
+     * @param file Es la imagen a copiar
+     */
+    private void copyImages(File file) throws IOException {
+        if (file != null) {
+            Path filePath = Paths.get(file.getAbsolutePath());
+            Path newPath = Paths.get(Main.rootPath + imgDeclaracionesPath + "\\", file.getName());
+            Files.copy(filePath, newPath, REPLACE_EXISTING, COPY_ATTRIBUTES, NOFOLLOW_LINKS);           
+        } else {
+            throw new NullPointerException();
+        }
+    }
+    
+    private void dialogAlert(String msg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText("Error");
+        alert.setContentText(msg);
+        alert.showAndWait();
     }
 }
