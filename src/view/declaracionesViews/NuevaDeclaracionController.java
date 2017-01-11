@@ -17,24 +17,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -255,11 +246,34 @@ public class NuevaDeclaracionController implements Initializable {
      */
     @FXML private void crearDeclaracion() {
         try {
+            // Copiamos las imágenes a nuestro directorio
             copyImages(fileDeclaracion);
-            if (fileDeclaracion2 != null)
+            if (fileDeclaracion2 != null) {
                 copyImages(fileDeclaracion2);
+            }
+            
+            // Creamos una lista de objetos Parcela con los datos introducidos por el usuario
+            for (int i=0; i<rowCounter; i++) {
+                int idParcela;
+                double sizeParcela;
+                boolean exists = false;
+                idParcela = Integer.parseInt(((TextField) sceneOwner.lookup("#id"+i)).getText());
+                sizeParcela = Double.parseDouble(((TextField) sceneOwner.lookup("#size"+i)).getText());
+                for (int j=0; j<listaParcelas.size(); i++) {
+                    Parcela parcelaTemp = listaParcelas.get(j);
+                    if (parcelaTemp.getIdParcela().get() == idParcela) {
+                        parcelaTemp.addToSizeParcela(sizeParcela);
+                        exists = true;
+                    }
+                }
+                if (!exists) {
+                    Parcela nuevaParcela;
+                    nuevaParcela = new Parcela(idParcela, sizeParcela);
+                    listaParcelas.add(nuevaParcela);
+                }
+            }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            dialogAlert("Ha habido un error al copiar la imagen");
         } catch (NullPointerException ex) {
             dialogAlert("Debes escoger una imagen para la declaración de cultivo");
         }

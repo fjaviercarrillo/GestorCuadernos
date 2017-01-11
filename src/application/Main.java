@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
     
     public static String rootPath;
+    private final String alcaolivaPath = "C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src";
     
     private Stage mainStage;
     public VBox rootLayout;
@@ -34,7 +35,7 @@ public class Main extends Application {
      * Se ejecuta al iniciar el apartado gráfico
      */
     public void initialize(){
-        rootPath = "C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src";
+        rootPath = alcaolivaPath;
     }
     
     @Override

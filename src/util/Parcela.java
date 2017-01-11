@@ -28,4 +28,8 @@ public class Parcela {
     public SimpleDoubleProperty getSizeParcela() {
         return sizeParcela;
     }
+    
+    public void addToSizeParcela(double newSize) {
+        this.sizeParcela.add(newSize);
+    }
 }
