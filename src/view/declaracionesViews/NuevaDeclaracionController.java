@@ -34,7 +34,11 @@ import javafx.stage.Stage;
 import util.Cliente;
 import util.Parcela;
 import application.Main;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.control.Alert;
+import util.DeclaracionCultivo;
 
 /**
  * FXML Controller class
@@ -50,6 +54,7 @@ public class NuevaDeclaracionController implements Initializable {
     private Scene sceneOwner;
     private ArrayList<Parcela> listaParcelas;
     private final String imgDeclaracionesPath = "\\img\\declaraciones";
+    private DeclaracionCultivo declaracionCultivo;
     
     @FXML Label nombreCliente;
     @FXML GridPane grid;
@@ -254,6 +259,9 @@ public class NuevaDeclaracionController implements Initializable {
             
             // Creamos una lista de objetos Parcela con los datos introducidos por el usuario
             populateParcelaList();
+            
+            // Creamos un objeto DeclaracionCultivo que contendrá los datos generales de nuestra declaración de cultivo
+            createDeclaracionCultivo();
         } catch (IOException ex) {
             dialogAlert("Ha habido un error al copiar la imagen");
         } catch (NullPointerException ex) {
@@ -275,6 +283,9 @@ public class NuevaDeclaracionController implements Initializable {
         }
     }
     
+    /**
+     * Coge los datos introducidos por el usuario y crea tantos objetos Parcela como ids distintas haya.
+     */
     private void populateParcelaList() {
         for (int i=0; i<rowCounter; i++) {
             int idParcela;
@@ -297,6 +308,30 @@ public class NuevaDeclaracionController implements Initializable {
         }
     }
     
+    /**
+     * Crea un objeto Declaración cultivo con coge los datos generales de la declaración introducidos por el usuario     
+     */
+    private void createDeclaracionCultivo() {
+        double totalSize = Double.parseDouble(totalSizeTextField.getText());
+        int idCliente = cliente.getIdCliente();
+        boolean necesitaAsesor = (totalSize >= 5.0);
+        String imageName1 = fileDeclaracion.getName();
+        if (fileDeclaracion2 == null) {
+            declaracionCultivo = new DeclaracionCultivo(idCliente, totalSize, necesitaAsesor, imageName1);
+        } else {
+            String imageName2 = fileDeclaracion2.getName();
+            declaracionCultivo = new DeclaracionCultivo(idCliente, totalSize, necesitaAsesor, imageName1, imageName2);
+        }
+        try {
+            declaracionCultivo.addDataToBD();
+        } catch (SQLException ex) {
+            dialogAlert("Ha habido algún error al añadir o coger los datos de la BD");
+        }
+    }
+    /**
+     * Muestra un mensaje en pantalla con el texto que le pasemos
+     * @param msg Es el texto a mostrar
+     */
     private void dialogAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText("Error");
