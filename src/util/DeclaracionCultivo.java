@@ -43,10 +43,10 @@ public class DeclaracionCultivo {
         int intNecesitaAsesor = (necesitaAsesor) ? 1 : 0;
         String query;
         if (imgName2 == null) {
-            query = "INSERT INTO DeclaracionCultivo (idCliente, totalSize, necesitaAsesor, imgName1) VALUES "
+            query = "INSERT INTO DeclaracionesCultivo (idCliente, totalSize, necesitaAsesor, imgName1) VALUES "
                     + "(" + idCliente + ", " + totalSize + ", " + intNecesitaAsesor + ", '" + imgName1 + "')";
         } else {
-            query = "INSERT INTO DeclaracionCultivo (idCliente, totalSize, necesitaAsesor, imgName1, imgName2) VALUES "
+            query = "INSERT INTO DeclaracionesCultivo (idCliente, totalSize, necesitaAsesor, imgName1, imgName2) VALUES "
                     + "(" + idCliente + ", " + totalSize + ", " + intNecesitaAsesor + ", '" + imgName1 + "', ' " + imgName2 + "')";
         }
         connection.executeQuery(query);
@@ -56,10 +56,11 @@ public class DeclaracionCultivo {
     
     private void setIdDeclaracionCultivo() throws SQLException {
         ConexionBD connection = new ConexionBD();
-        String query = "SELECT idDeclaracionCultivo FROM DeclaracionCultivo WHERE idCliente = " + idCliente;
+        String query = "SELECT idDeclaracionCultivo FROM DeclaracionesCultivo WHERE idCliente = " + idCliente;
         ResultSet results = connection.selectQuery(query);
         results.next();
         idDeclaracionCultivo = results.getInt("idDeclaracion");
+        connection.close();
     }
     
     public double getTotalSize() {

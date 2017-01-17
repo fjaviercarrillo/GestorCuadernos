@@ -23,7 +23,8 @@ import javafx.stage.Stage;
 public class Main extends Application {
     
     public static String rootPath;
-    private final String alcaolivaPath = "C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src";
+    public static String pathAlcaoliva = "jdbc:sqlite:C:\\Users\\Sk\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db";
+    public static String pathSk = "jdbc:sqlite:C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db";
     
     private Stage mainStage;
     public VBox rootLayout;

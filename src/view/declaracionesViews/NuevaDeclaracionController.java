@@ -34,10 +34,14 @@ import javafx.stage.Stage;
 import util.Cliente;
 import util.Parcela;
 import application.Main;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.control.Alert;
+import util.ConexionBD;
 import util.DeclaracionCultivo;
 
 /**
@@ -55,6 +59,7 @@ public class NuevaDeclaracionController implements Initializable {
     private ArrayList<Parcela> listaParcelas;
     private final String imgDeclaracionesPath = "\\img\\declaraciones";
     private DeclaracionCultivo declaracionCultivo;
+    private Connection connection;
     
     @FXML Label nombreCliente;
     @FXML GridPane grid;
@@ -78,7 +83,20 @@ public class NuevaDeclaracionController implements Initializable {
         totalSizeTextField.setText("0.0");
         addRow();
         addButtonFileListeners();
-    }    
+        connectToBD();
+    }   
+    
+    /**
+     * Crea una conexión con la base de datos
+     */
+    private void connectToBD() {
+        connection = null;
+        try {
+            connection = DriverManager.getConnection(Main.pathAlcaoliva);
+        } catch (SQLException ex) {
+            Logger.getLogger(NuevaDeclaracionController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     /**
      * Crea los datos principales de la ventana
@@ -250,22 +268,32 @@ public class NuevaDeclaracionController implements Initializable {
      * Aceptamos la declaración, copiamos las imágenes y agregamos datos a la BD
      */
     @FXML private void crearDeclaracion() {
-        try {
-            // Copiamos las imágenes a nuestro directorio
-            copyImages(fileDeclaracion);
-            if (fileDeclaracion2 != null) {
-                copyImages(fileDeclaracion2);
+        if (rowCounter!=1) {
+            try {
+                // Copiamos las imágenes a nuestro directorio
+                copyImages(fileDeclaracion);
+                if (fileDeclaracion2 != null) {
+                    copyImages(fileDeclaracion2);
+                }
+
+                // Creamos una lista de objetos Parcela con los datos introducidos por el usuario
+                populateParcelaList();
+
+                // Creamos un objeto DeclaracionCultivo que contendrá los datos generales de nuestra declaración de cultivo
+                createDeclaracionCultivo();
+
+                // Introducimos todas las parcelas en la BD
+                addParcelasToBD();
+            } catch (IOException ex) {
+                dialogAlert("Ha habido un error al copiar la imagen");
+            } catch (NullPointerException ex) {
+                dialogAlert("Debes escoger una imagen para la declaración de cultivo");
+            } catch (SQLException ex) {
+                dialogAlert("Ha habido un error al insertar datos en la BD");
+                Logger.getLogger(NuevaDeclaracionController.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            // Creamos una lista de objetos Parcela con los datos introducidos por el usuario
-            populateParcelaList();
-            
-            // Creamos un objeto DeclaracionCultivo que contendrá los datos generales de nuestra declaración de cultivo
-            createDeclaracionCultivo();
-        } catch (IOException ex) {
-            dialogAlert("Ha habido un error al copiar la imagen");
-        } catch (NullPointerException ex) {
-            dialogAlert("Debes escoger una imagen para la declaración de cultivo");
+        } else {
+            dialogAlert("Debe añadir al menos una parcela para crear la declaración de cultivo");
         }
     }
     
@@ -287,13 +315,13 @@ public class NuevaDeclaracionController implements Initializable {
      * Coge los datos introducidos por el usuario y crea tantos objetos Parcela como ids distintas haya.
      */
     private void populateParcelaList() {
-        for (int i=0; i<rowCounter; i++) {
+        for (int i=1; i<rowCounter; i++) {
             int idParcela;
             double sizeParcela;
             boolean exists = false;
             idParcela = Integer.parseInt(((TextField) sceneOwner.lookup("#id"+i)).getText());
             sizeParcela = Double.parseDouble(((TextField) sceneOwner.lookup("#size"+i)).getText());
-            for (int j=0; j<listaParcelas.size(); i++) {
+            for (int j=0; j<listaParcelas.size(); j++) {
                 Parcela parcelaTemp = listaParcelas.get(j);
                 if (parcelaTemp.getIdParcela().get() == idParcela) {
                     parcelaTemp.addToSizeParcela(sizeParcela);
@@ -328,6 +356,24 @@ public class NuevaDeclaracionController implements Initializable {
             dialogAlert("Ha habido algún error al añadir o coger los datos de la BD");
         }
     }
+    
+    private void addParcelasToBD() throws SQLException {
+        int idCliente = declaracionCultivo.getIdCliente();
+        int idDeclaracionCultivo = declaracionCultivo.getIdDeclaracionCultivo();
+        String sql = "INSERT INTO Parcelas (idCliente, idDeclaracionCultivo, size) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            for (int i=0; i<listaParcelas.size(); i++) {
+                double sizeParcela = listaParcelas.get(i).getSizeParcela().get();
+                preparedStatement.clearParameters();
+                preparedStatement.setInt(1, idCliente);
+                preparedStatement.setInt(2, idDeclaracionCultivo);
+                preparedStatement.setDouble(3, sizeParcela);
+                preparedStatement.executeQuery();
+            }
+            preparedStatement.close();
+        }
+    }
+    
     /**
      * Muestra un mensaje en pantalla con el texto que le pasemos
      * @param msg Es el texto a mostrar
