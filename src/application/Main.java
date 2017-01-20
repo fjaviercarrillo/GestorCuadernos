@@ -23,8 +23,8 @@ import javafx.stage.Stage;
 public class Main extends Application {
     
     public static String rootPath;
-    public static String pathAlcaoliva = "jdbc:sqlite:C:\\Users\\Sk\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db";
-    public static String pathSk = "jdbc:sqlite:C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\cuadernoDB.db";
+    public static String pathSk = "C:\\Users\\Sk\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\";
+    public static String pathAlcaoliva = "C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\";
     
     private Stage mainStage;
     public VBox rootLayout;
@@ -36,7 +36,7 @@ public class Main extends Application {
      * Se ejecuta al iniciar el apartado gráfico
      */
     public void initialize(){
-        rootPath = alcaolivaPath;
+        rootPath = pathSk;
     }
     
     @Override

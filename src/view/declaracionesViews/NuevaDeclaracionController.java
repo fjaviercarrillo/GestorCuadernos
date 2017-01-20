@@ -83,7 +83,6 @@ public class NuevaDeclaracionController implements Initializable {
         totalSizeTextField.setText("0.0");
         addRow();
         addButtonFileListeners();
-        connectToBD();
     }   
     
     /**
@@ -92,7 +91,7 @@ public class NuevaDeclaracionController implements Initializable {
     private void connectToBD() {
         connection = null;
         try {
-            connection = DriverManager.getConnection(Main.pathAlcaoliva);
+            connection = DriverManager.getConnection("jdbc:sqlite:"+Main.rootPath+"cuadernoDB.db");
         } catch (SQLException ex) {
             Logger.getLogger(NuevaDeclaracionController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -270,6 +269,9 @@ public class NuevaDeclaracionController implements Initializable {
     @FXML private void crearDeclaracion() {
         if (rowCounter!=1) {
             try {
+                // Conectamos a la base de datos
+                connectToBD();
+                
                 // Copiamos las imágenes a nuestro directorio
                 copyImages(fileDeclaracion);
                 if (fileDeclaracion2 != null) {
@@ -351,7 +353,7 @@ public class NuevaDeclaracionController implements Initializable {
             declaracionCultivo = new DeclaracionCultivo(idCliente, totalSize, necesitaAsesor, imageName1, imageName2);
         }
         try {
-            declaracionCultivo.addDataToBD();
+            declaracionCultivo.addDataToBD(connection);
         } catch (SQLException ex) {
             dialogAlert("Ha habido algún error al añadir o coger los datos de la BD");
         }
