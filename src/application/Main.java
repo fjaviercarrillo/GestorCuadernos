@@ -25,6 +25,8 @@ public class Main extends Application {
     public static String rootPath;
     public static String pathSk = "C:\\Users\\Sk\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\";
     public static String pathAlcaoliva = "C:\\Users\\ALCAOLIVA\\Documents\\NetBeansProjects\\GestorCuadernos\\src\\";
+    public static int DIALOG_INFO = 2;
+    public static int DIALOG_ERROR = 1;
     
     private Stage mainStage;
     public VBox rootLayout;

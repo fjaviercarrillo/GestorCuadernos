@@ -41,7 +41,6 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.control.Alert;
-import util.ConexionBD;
 import util.DeclaracionCultivo;
 
 /**
@@ -132,6 +131,12 @@ public class NuevaDeclaracionController implements Initializable {
     private void addButtonFileListeners() {
         buttonFichero.setOnAction((ActionEvent e) -> {
             openFileDialog(true);
+        });
+        buttonFichero.setOnKeyPressed(button -> {
+            KeyCode key = button.getCode();
+            if (key == KeyCode.ENTER) {
+                openFileDialog(true);
+            }
         });
         buttonFichero2.setOnAction((ActionEvent e) -> {
             openFileDialog(false);
@@ -286,16 +291,20 @@ public class NuevaDeclaracionController implements Initializable {
 
                 // Introducimos todas las parcelas en la BD
                 addParcelasToBD();
+                
+                dialogAlert("La declaración de cultivo se ha creado con éxito", Main.DIALOG_INFO);
+                connection.close();
+                stage.close();
             } catch (IOException ex) {
-                dialogAlert("Ha habido un error al copiar la imagen");
+                dialogAlert("Ha habido un error al copiar la imagen", Main.DIALOG_ERROR);
             } catch (NullPointerException ex) {
-                dialogAlert("Debes escoger una imagen para la declaración de cultivo");
+                dialogAlert("Debes escoger una imagen para la declaración de cultivo", Main.DIALOG_ERROR);
             } catch (SQLException ex) {
-                dialogAlert("Ha habido un error al insertar datos en la BD");
+                dialogAlert("Ha habido un error al insertar datos en la BD", Main.DIALOG_ERROR);
                 Logger.getLogger(NuevaDeclaracionController.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            dialogAlert("Debe añadir al menos una parcela para crear la declaración de cultivo");
+            dialogAlert("Debe añadir al menos una parcela para crear la declaración de cultivo", Main.DIALOG_ERROR);
         }
     }
     
@@ -321,20 +330,25 @@ public class NuevaDeclaracionController implements Initializable {
             int idParcela;
             double sizeParcela;
             boolean exists = false;
-            idParcela = Integer.parseInt(((TextField) sceneOwner.lookup("#id"+i)).getText());
-            sizeParcela = Double.parseDouble(((TextField) sceneOwner.lookup("#size"+i)).getText());
-            for (int j=0; j<listaParcelas.size(); j++) {
-                Parcela parcelaTemp = listaParcelas.get(j);
-                if (parcelaTemp.getIdParcela().get() == idParcela) {
-                    parcelaTemp.addToSizeParcela(sizeParcela);
-                    exists = true;
+            String strIdParcela, strSizeParcela;
+            strIdParcela = ((TextField) sceneOwner.lookup("#id"+i)).getText();
+            strSizeParcela = ((TextField) sceneOwner.lookup("#size"+i)).getText();
+            if (!strIdParcela.isEmpty() && !strSizeParcela.isEmpty()) {
+                idParcela = Integer.parseInt(strIdParcela);
+                sizeParcela = Double.parseDouble(strSizeParcela);
+                for (int j=0; j<listaParcelas.size(); j++) {
+                    Parcela parcelaTemp = listaParcelas.get(j);
+                    if (parcelaTemp.getIdParcela().get() == idParcela) {
+                        parcelaTemp.addToSizeParcela(sizeParcela);
+                        exists = true;
+                    }
                 }
-            }
-            if (!exists) {
-                Parcela nuevaParcela;
-                nuevaParcela = new Parcela(idParcela, sizeParcela);
-                listaParcelas.add(nuevaParcela);
-            }
+                if (!exists) {
+                    Parcela nuevaParcela;
+                    nuevaParcela = new Parcela(idParcela, sizeParcela);
+                    listaParcelas.add(nuevaParcela);
+                }
+            }                 
         }
     }
     
@@ -355,22 +369,24 @@ public class NuevaDeclaracionController implements Initializable {
         try {
             declaracionCultivo.addDataToBD(connection);
         } catch (SQLException ex) {
-            dialogAlert("Ha habido algún error al añadir o coger los datos de la BD");
+            dialogAlert("Ha habido algún error al añadir o coger los datos de la BD", Main.DIALOG_ERROR);
         }
     }
     
     private void addParcelasToBD() throws SQLException {
         int idCliente = declaracionCultivo.getIdCliente();
         int idDeclaracionCultivo = declaracionCultivo.getIdDeclaracionCultivo();
-        String sql = "INSERT INTO Parcelas (idCliente, idDeclaracionCultivo, size) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Parcelas (idParcela, idCliente, idDeclaracionCultivo, sizeDeclaracion) VALUES (?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             for (int i=0; i<listaParcelas.size(); i++) {
                 double sizeParcela = listaParcelas.get(i).getSizeParcela().get();
+                int idParcela = listaParcelas.get(i).getIdParcela().get();
                 preparedStatement.clearParameters();
-                preparedStatement.setInt(1, idCliente);
-                preparedStatement.setInt(2, idDeclaracionCultivo);
-                preparedStatement.setDouble(3, sizeParcela);
-                preparedStatement.executeQuery();
+                preparedStatement.setInt(1, idParcela);
+                preparedStatement.setInt(2, idCliente);
+                preparedStatement.setInt(3, idDeclaracionCultivo);
+                preparedStatement.setDouble(4, sizeParcela);
+                preparedStatement.executeUpdate();
             }
             preparedStatement.close();
         }
@@ -380,9 +396,15 @@ public class NuevaDeclaracionController implements Initializable {
      * Muestra un mensaje en pantalla con el texto que le pasemos
      * @param msg Es el texto a mostrar
      */
-    private void dialogAlert(String msg) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText("Error");
+    private void dialogAlert(String msg, int dialogType) {
+        Alert alert;
+        if (dialogType == Main.DIALOG_ERROR) {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error");
+        } else {
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Éxito");
+        }
         alert.setContentText(msg);
         alert.showAndWait();
     }
