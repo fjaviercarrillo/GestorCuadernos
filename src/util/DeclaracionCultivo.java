@@ -39,6 +39,15 @@ public class DeclaracionCultivo {
         this.imgName2 = imgName2;
     }
     
+    public DeclaracionCultivo(int idDeclaracionCultivo, int idCliente, double totalSize, boolean necesitaAsesor, String imgName1, String imgName2) {
+        this.totalSize = totalSize;
+        this.idCliente = idCliente;
+        this.necesitaAsesor = necesitaAsesor;
+        this.imgName1 = imgName1;
+        this.imgName2 = imgName2;
+        this.idDeclaracionCultivo = idDeclaracionCultivo;
+    }
+    
     public void addDataToBD(Connection connection) throws SQLException {
         int intNecesitaAsesor = (necesitaAsesor) ? 1 : 0;
         String query = "INSERT INTO DeclaracionesCultivo (idCliente, totalSize, necesitaAsesor, imgName1, imgName2) VALUES (?, ?, ?, ?, ?)";

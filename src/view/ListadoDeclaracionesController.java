@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -115,15 +116,69 @@ public class ListadoDeclaracionesController implements Initializable {
     private void fillDeclaracionData() {
         cliente = (Cliente) listaResultados.getSelectionModel().getSelectedItem();
         listadoParcelas = new ArrayList<>();
-        getDeclaracionDataFromBD();
-        
+        connectToBD();
+        try {
+            getDataFromBD();
+        } catch (SQLException ex) {
+            dialogAlert("Ha habido un error al coger los datos de la declaración de cultivo de la base de datos", Main.DIALOG_ERROR);
+        }
     }
     
     /**
-     * Llena las diferentes variables con los datos de la declaración de cultivo
+     * Coge todos los datos de la base de datos
+     * @throws SQLException Lanza una excepción si hay algún problema al coger algún dato de la BD
      */
-    private void getDeclaracionDataFromBD() {
+    private void getDataFromBD() throws SQLException {
+        getDeclaracionDataFromBD();
+        getParcelasDataFromBD();
+    }
+    
+    /**
+     * Coge los datos de la declaración de cultivo
+     * @throws SQLException Lanza una excepción si hay algún problema con la consulta
+     */
+    private void getDeclaracionDataFromBD() throws SQLException {
+        int idDeclaracionCultivo, idCliente;
+        boolean necesitaAsesor;
+        String imgName1, imgName2;
+        Double totalSize;
         
+        ResultSet results = null;
+        Statement statement = connection.createStatement();        
+        String query = "SELECT * FROM DeclaracionesCultivo WHERE idCliente = "
+                + "(SELECT id FROM Clientes WHERE DNI = '" + cliente.getDNI() + "');";
+        results = statement.executeQuery(query);
+        results.next();
+        
+        idDeclaracionCultivo = results.getInt("idDeclaracionCultivo");
+        idCliente = results.getInt("idCliente");
+        necesitaAsesor = results.getBoolean("necesitaAsesor");
+        imgName1 = results.getString("imgName1");
+        imgName2 = results.getString("imgName2");
+        totalSize = results.getDouble("totalSize");
+        declaracionCultivo = new DeclaracionCultivo(idDeclaracionCultivo, idCliente, totalSize, necesitaAsesor, imgName1, imgName2);
+        results.close();
+        statement.close();
+    }
+    
+    /**
+     * Coge los datos de las parcelas de la base de datos
+     * @throws SQLException Lanza una excepción si hay algún problema con la consulta
+     */
+    private void getParcelasDataFromBD() throws SQLException {
+        ResultSet results;
+        Statement statement = connection.createStatement();
+        int idParcela;
+        double sizeParcela;
+        String query = "SELECT * FROM Parcelas WHERE idDeclaracionCultivo = " + declaracionCultivo.getIdDeclaracionCultivo();
+        results = statement.executeQuery(query);
+        while (results.next()) {
+            idParcela = results.getInt("idParcela");
+            sizeParcela = results.getDouble("sizeDeclaracion");
+            listadoParcelas.add(new Parcela(idParcela, sizeParcela));
+        }
+        results.close();
+        statement.close();
     }
     
     /**
@@ -257,5 +312,22 @@ public class ListadoDeclaracionesController implements Initializable {
         } catch (SQLException ex) {
             Logger.getLogger(NuevaDeclaracionController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    /**
+     * Muestra un mensaje en pantalla con el texto que le pasemos
+     * @param msg Es el texto a mostrar
+     */
+    private void dialogAlert(String msg, int dialogType) {
+        Alert alert;
+        if (dialogType == Main.DIALOG_ERROR) {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error");
+        } else {
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText("Éxito");
+        }
+        alert.setContentText(msg);
+        alert.showAndWait();
     }
 }
