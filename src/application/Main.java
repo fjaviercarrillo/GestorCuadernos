@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * TODO:
+        - Cerrar las conexiones al cerrar el programa
  */
 package application;
 
@@ -12,6 +11,7 @@ import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -38,7 +38,7 @@ public class Main extends Application {
      * Se ejecuta al iniciar el apartado gráfico
      */
     public void initialize(){
-        rootPath = pathSk;
+        rootPath = pathAlcaoliva;
     }
     
     @Override

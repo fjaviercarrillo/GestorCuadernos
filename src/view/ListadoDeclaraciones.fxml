@@ -43,7 +43,7 @@
                               <HBox alignment="CENTER_LEFT" layoutX="385.0" layoutY="14.0" spacing="100.0">
                                  <children>
                                     <Label fx:id="lblClienteDeclaracion" layoutX="321.0" layoutY="18.0" text="Label" />
-                                    <Button layoutX="453.0" layoutY="14.0" mnemonicParsing="false" text="Ver imagen declaración de cultivo" />
+                                    <Button fx:id="btnImage" layoutX="453.0" layoutY="14.0" mnemonicParsing="false" text="Ver imagen declaración de cultivo" />
                                     <Label fx:id="lblSuperficieTotal" layoutX="618.0" layoutY="18.0" text="Superficie total: " />
                                  </children>
                               </HBox>
@@ -53,13 +53,23 @@
                            <children>
                               <TableView fx:id="tablaParcelas" layoutX="424.0" prefHeight="200.0" prefWidth="432.0">
                                 <columns>
-                                  <TableColumn prefWidth="120.0" text="Parcela" />
-                                  <TableColumn minWidth="0.0" prefWidth="170.0" text="Tamaño " />
+                                  <TableColumn fx:id="columnaIdParcela" prefWidth="120.0" text="Parcela" />
+                                  <TableColumn fx:id="columnaSizeParcela" minWidth="0.0" prefWidth="170.0" text="Tamaño " />
                                 </columns>
                               </TableView>
                            </children>
                         </AnchorPane>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <HBox layoutX="388.0" layoutY="64.0" spacing="30.0">
+                                 <children>
+                                    <Button layoutX="522.0" layoutY="64.0" mnemonicParsing="false" onAction="#newParcela" text="Nueva parcela" />
+                                    <Button layoutX="706.0" layoutY="77.0" mnemonicParsing="false" onAction="#updateParcela" text="Editar Parcela" />
+                                    <Button layoutX="851.0" layoutY="64.0" mnemonicParsing="false" text="Borrar Parcela" />
+                                    <Button layoutX="1016.0" layoutY="65.0" mnemonicParsing="false" text="BORRAR DECLARACIÓN" />
+                                 </children>
+                              </HBox>
+                           </children></AnchorPane>
                      </children>
                   </VBox>
                </children>

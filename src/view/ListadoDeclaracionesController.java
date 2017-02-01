@@ -1,7 +1,5 @@
 /*
  * TODO: 
-    - Cambiar la forma en la que se conecta a la BD para los resultados del cuadro de texto
-    - Llenar el TableView con los datos de las parcelas
     - Habilitar botones para editar y eliminar la declaración de cultivo
     - (Idea) Poner una vista en miniatura de la imagen de la declaración de cultivo
  */
@@ -28,12 +26,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -42,7 +43,9 @@ import util.Cliente;
 import util.ConexionBD;
 import util.DeclaracionCultivo;
 import util.Parcela;
+import view.declaracionesViews.EditarParcelaController;
 import view.declaracionesViews.NuevaDeclaracionController;
+import view.declaracionesViews.NuevaParcelaController;
 
 /**
  * FXML Controller class
@@ -59,12 +62,15 @@ public class ListadoDeclaracionesController implements Initializable {
     @FXML private Label lblSuperficieTotal;
     @FXML private Label lblClienteDeclaracion;
     @FXML private TableView tablaParcelas;
+    @FXML private TableColumn columnaIdParcela;
+    @FXML private TableColumn columnaSizeParcela;
+    @FXML private Button btnImage;
     
     private ObservableList<Cliente> listaClientes;
     List<Cliente> lista;
     private Cliente cliente;
     private DeclaracionCultivo declaracionCultivo;
-    private ArrayList<Parcela> listadoParcelas;
+    private ObservableList<Parcela> listadoParcelas;
     private Connection connection;
     
     /**
@@ -74,6 +80,7 @@ public class ListadoDeclaracionesController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         setTextFieldKeyListener();
         setListViewKeyListener();
+        connectToBD();
     }    
     
     /**
@@ -101,6 +108,7 @@ public class ListadoDeclaracionesController implements Initializable {
         listaResultados.setOnKeyPressed(listView -> {
             KeyCode key = listView.getCode();
             if (key == KeyCode.ENTER) {
+                cliente = (Cliente) listaResultados.getSelectionModel().getSelectedItem();
                 if (comprobarDeclaracion()) {
                     fillDeclaracionData();
                 } else {
@@ -114,11 +122,20 @@ public class ListadoDeclaracionesController implements Initializable {
      * Rellena la ventana con todos los datos de la declaración de cultivo del usuario seleccionado
      */
     private void fillDeclaracionData() {
-        cliente = (Cliente) listaResultados.getSelectionModel().getSelectedItem();
-        listadoParcelas = new ArrayList<>();
-        connectToBD();
+        listadoParcelas = FXCollections.observableArrayList();
         try {
             getDataFromBD();
+            lblClienteDeclaracion.setText(cliente.getNombre() + " " + cliente.getApellidos());
+            lblSuperficieTotal.setText("Superficie total: " + String.valueOf(declaracionCultivo.getTotalSize()) + " ha");
+            btnImage.setOnAction(bt -> {
+                try {
+                    Runtime.getRuntime().exec("powershell -c "+Main.rootPath + "img\\declaraciones\\" + declaracionCultivo.getImg1());
+                } catch (IOException ex) {
+                    Logger.getLogger(ListadoDeclaracionesController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            });
+            addDataToTable();
+            connection.close();
         } catch (SQLException ex) {
             dialogAlert("Ha habido un error al coger los datos de la declaración de cultivo de la base de datos", Main.DIALOG_ERROR);
         }
@@ -168,17 +185,33 @@ public class ListadoDeclaracionesController implements Initializable {
     private void getParcelasDataFromBD() throws SQLException {
         ResultSet results;
         Statement statement = connection.createStatement();
-        int idParcela;
+        int idParcela, keyParcela;
         double sizeParcela;
         String query = "SELECT * FROM Parcelas WHERE idDeclaracionCultivo = " + declaracionCultivo.getIdDeclaracionCultivo();
         results = statement.executeQuery(query);
         while (results.next()) {
             idParcela = results.getInt("idParcela");
             sizeParcela = results.getDouble("sizeDeclaracion");
-            listadoParcelas.add(new Parcela(idParcela, sizeParcela));
+            keyParcela = results.getInt("keyParcela");
+            listadoParcelas.add(new Parcela(idParcela, sizeParcela, keyParcela));
         }
         results.close();
         statement.close();
+    }
+    
+    /**
+     * Añade los datos de las parcelas a la tabla
+     */
+    private void addDataToTable() {
+        columnaIdParcela.setCellValueFactory(new PropertyValueFactory<>("idParcela"));
+        columnaSizeParcela.setCellValueFactory(new PropertyValueFactory<>("sizeParcela"));
+        tablaParcelas.setItems(listadoParcelas);
+        tablaParcelas.setOnKeyPressed(tv -> {
+            KeyCode key = tv.getCode();
+            if (key == KeyCode.ENTER) {
+                updateParcela();
+            }
+        });
     }
     
     /**
@@ -207,6 +240,8 @@ public class ListadoDeclaracionesController implements Initializable {
                 controller.setData((Cliente) listaResultados.getSelectionModel().getSelectedItem(), secondStage, scene);
                 
                 secondStage.showAndWait();
+                
+                fillDeclaracionData();
             } catch (IOException ex) {
                 Logger.getLogger(ListadoDeclaracionesController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -218,17 +253,22 @@ public class ListadoDeclaracionesController implements Initializable {
      * @return true si existe, false en el caso contrario
      */
     private boolean comprobarDeclaracion() {
-        ConexionBD connection = new ConexionBD();
         String query = "SELECT * FROM DeclaracionesCultivo WHERE idCliente = " + cliente.getIdCliente();
-        ResultSet results = connection.selectQuery(query);
+        Statement statement;
+        ResultSet results;
+        boolean exists = true;
         try {
+            statement = connection.createStatement();
+            results = statement.executeQuery(query);
             if (!results.next()) {
-                return false;
+                exists = false;
             }
+            statement.close();
+            results.close();
         } catch (SQLException ex) {
             Logger.getLogger(ListadoDeclaracionesController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return true;
+        return exists;
     }
     
     /**
@@ -236,12 +276,12 @@ public class ListadoDeclaracionesController implements Initializable {
      */
     private void getListaClientesFromBD() {
         try {
-            ConexionBD connection = new ConexionBD();
+            Statement statement = connection.createStatement();
             String text = textBusqueda.getText();
             String query = "SELECT Nombre, Apellidos, DNI, Direccion, CP, Localidad, Provincia, Pais, id, NecesitaAsesor, "
                     + "(Nombre||' '||Apellidos) as Cliente "
                     + "FROM Clientes WHERE Nombre||' '||Apellidos LIKE '%" + text + "%'";
-            ResultSet result = connection.selectQuery(query);
+            ResultSet result = statement.executeQuery(query);
             lista = new ArrayList<>();
             while (result.next()) {
                 String nombreCliente = result.getString("Nombre");
@@ -253,7 +293,7 @@ public class ListadoDeclaracionesController implements Initializable {
                 String provinciaCliente = result.getString("Provincia");
                 String paisCliente = result.getString("Pais");
                 int idCliente = result.getInt("id");
-                boolean necesitaAsesorCliente = (result.getInt("NecesitaAsesor") == 0)?false:true;
+                boolean necesitaAsesorCliente = (result.getInt("NecesitaAsesor") != 0);
                 lista.add(new Cliente(nombreCliente, apellidosCliente, DNICliente, direccionCliente, codigoPostal,
                         localidadCliente, provinciaCliente, paisCliente, necesitaAsesorCliente, idCliente));
             }
@@ -298,6 +338,59 @@ public class ListadoDeclaracionesController implements Initializable {
         listaResultados.setPrefHeight(listaClientes.size() * ROW_HEIGHT + 2);
     }
     
+    @FXML private void newParcela() {
+        try {
+            // Carga el archivo fxml
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/view/declaracionesViews/NuevaParcela.fxml"));
+            AnchorPane newParcelaLayout = (AnchorPane) loader.load();
+            
+            // Crea la nueva ventana
+            Stage secondStage = new Stage();
+            secondStage.setTitle("Nueva parcela");
+            Scene scene = new Scene(newParcelaLayout);
+            secondStage.setScene(scene);
+            
+            //Pasa el cliente al controlador
+            NuevaParcelaController controller = loader.getController();
+            controller.setData(declaracionCultivo, secondStage, cliente);
+            secondStage.showAndWait();
+            
+            listadoParcelas.clear();
+            fillDeclaracionData();
+        } catch (IOException ex) {
+            Logger.getLogger(ListadoDeclaracionesController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @FXML private void updateParcela() {
+        Parcela selectedParcela = (Parcela) tablaParcelas.getSelectionModel().getSelectedItem();
+        if (selectedParcela != null) {
+            try {
+                // Carga el archivo fxml
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getResource("/view/declaracionesViews/EditarParcela.fxml"));
+                AnchorPane updateClienteLayout = (AnchorPane) loader.load();
+
+                // Crea la nueva ventana
+                Stage secondStage = new Stage();
+                secondStage.setTitle("Editar parcela");
+                Scene scene = new Scene(updateClienteLayout);
+                secondStage.setScene(scene);
+
+                //Pasa el cliente al controlador
+                EditarParcelaController controller = loader.getController();
+                controller.setData(selectedParcela, declaracionCultivo, secondStage);
+                secondStage.showAndWait();
+
+                listadoParcelas.clear();
+                fillDeclaracionData();
+            } catch (IOException ex) {
+                Logger.getLogger(ListadoDeclaracionesController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
     /**
      * Pone el texto del cuadro de búsqueda en blanco
      */
@@ -305,6 +398,9 @@ public class ListadoDeclaracionesController implements Initializable {
         textBusqueda.setText("");
     }
     
+    /**
+     * Conecta a la base de datos
+     */
     private void connectToBD() {
         connection = null;
         try {

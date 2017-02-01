@@ -91,4 +91,12 @@ public class DeclaracionCultivo {
     public boolean necesitaAsesor() {
         return necesitaAsesor;
     }
+    
+    public String getImg1() {
+        return this.imgName1;
+    }
+    
+    public void setTotalSize(double totalSize) {
+        this.totalSize = totalSize;
+    }
 }

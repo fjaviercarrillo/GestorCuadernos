@@ -263,7 +263,7 @@ public class NuevaDeclaracionController implements Initializable {
     private void putTotalSize() {
         double totalSize = 0.0;
         for (int i=0; i<listaParcelas.size(); i++) {
-            totalSize += listaParcelas.get(i).getSizeParcela().get();
+            totalSize += listaParcelas.get(i).getSizeParcela();
         }
         totalSizeTextField.setText(String.valueOf(totalSize));
     }
@@ -338,7 +338,7 @@ public class NuevaDeclaracionController implements Initializable {
                 sizeParcela = Double.parseDouble(strSizeParcela);
                 for (int j=0; j<listaParcelas.size(); j++) {
                     Parcela parcelaTemp = listaParcelas.get(j);
-                    if (parcelaTemp.getIdParcela().get() == idParcela) {
+                    if (parcelaTemp.getIdParcela() == idParcela) {
                         parcelaTemp.addToSizeParcela(sizeParcela);
                         exists = true;
                     }
@@ -379,8 +379,8 @@ public class NuevaDeclaracionController implements Initializable {
         String sql = "INSERT INTO Parcelas (idParcela, idCliente, idDeclaracionCultivo, sizeDeclaracion) VALUES (?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             for (int i=0; i<listaParcelas.size(); i++) {
-                double sizeParcela = listaParcelas.get(i).getSizeParcela().get();
-                int idParcela = listaParcelas.get(i).getIdParcela().get();
+                double sizeParcela = listaParcelas.get(i).getSizeParcela();
+                int idParcela = listaParcelas.get(i).getIdParcela();
                 preparedStatement.clearParameters();
                 preparedStatement.setInt(1, idParcela);
                 preparedStatement.setInt(2, idCliente);

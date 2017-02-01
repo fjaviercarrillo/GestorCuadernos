@@ -15,21 +15,36 @@ import javafx.beans.property.SimpleIntegerProperty;
 public class Parcela {
     private SimpleIntegerProperty idParcela;
     private SimpleDoubleProperty sizeParcela;
+    private int keyParcela;
     
     public Parcela(int idParcela, double sizeParcela) {
         this.idParcela = new SimpleIntegerProperty(idParcela);
         this.sizeParcela = new SimpleDoubleProperty(sizeParcela);
     }
     
-    public SimpleIntegerProperty getIdParcela() {
-        return idParcela;
+    public Parcela(int idParcela, double sizeParcela, int keyParcela) {
+        this.idParcela = new SimpleIntegerProperty(idParcela);
+        this.sizeParcela = new SimpleDoubleProperty(sizeParcela);
+        this.keyParcela = keyParcela;
     }
     
-    public SimpleDoubleProperty getSizeParcela() {
-        return sizeParcela;
+    public int getIdParcela() {
+        return idParcela.get();
+    }
+    
+    public double getSizeParcela() {
+        return sizeParcela.get();
     }
     
     public void addToSizeParcela(double newSize) {
         this.sizeParcela.add(newSize);
+    }
+    
+    public int getKeyParcela() {
+        return keyParcela;
+    }
+    
+    public void setKeyParcela(int keyParcela) {
+        this.keyParcela = keyParcela;
     }
 }
