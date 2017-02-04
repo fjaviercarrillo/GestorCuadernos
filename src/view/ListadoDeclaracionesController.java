@@ -40,7 +40,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import util.Cliente;
-import util.ConexionBD;
 import util.DeclaracionCultivo;
 import util.Parcela;
 import view.declaracionesViews.EditarParcelaController;

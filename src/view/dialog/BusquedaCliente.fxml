@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="265.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.dialog.BusquedaClienteController">
+   <children>
+      <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane prefHeight="200.0">
+               <children>
+                  <TextField fx:id="textBusqueda" layoutX="149.0" layoutY="46.0" onKeyReleased="#busquedaCliente" onMouseClicked="#onClickBusqueda" prefHeight="25.0" prefWidth="402.0" />
+               </children>
+            </AnchorPane>
+            <AnchorPane prefHeight="321.0" prefWidth="700.0">
+               <children>
+                  <ListView fx:id="listaResultados" layoutX="149.0" prefHeight="158.0" prefWidth="402.0" />
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
